@@ -1,0 +1,28 @@
+package com.buoobuoo.minecraftenhanced.core.item.impl;
+
+import com.buoobuoo.minecraftenhanced.core.block.CustomBlocks;
+import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.BlockItem;
+import org.bukkit.Material;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+
+public class TitaniumOreItem extends CustomItem implements BlockItem {
+    public TitaniumOreItem() {
+        super("TITANIUM_ORE", Material.PAPER, 1002, "Titanium Ore");
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event){
+        if(event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
+
+
+    }
+
+    @Override
+    public CustomBlocks blockPlaced() {
+        return CustomBlocks.TITANIUM_ORE;
+    }
+}
