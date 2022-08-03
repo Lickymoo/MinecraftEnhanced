@@ -1,5 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.item.attributes;
 
+import com.buoobuoo.minecraftenhanced.core.damage.DamageInstance;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.Pair;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
@@ -32,4 +33,6 @@ public abstract class ItemAttribute implements Listener {
             val = Math.round(val);
         return  val;
     }
+
+    public abstract void onDamage(DamageInstance damageInstance, ItemAttributeInstance instance);
 }

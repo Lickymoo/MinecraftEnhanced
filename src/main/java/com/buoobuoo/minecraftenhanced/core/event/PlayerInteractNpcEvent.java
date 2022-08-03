@@ -1,6 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.event;
 
-import com.buoobuoo.minecraftenhanced.core.npc.NpcInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.npc.NpcInstance;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

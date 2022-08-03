@@ -3,17 +3,22 @@ package com.buoobuoo.minecraftenhanced;
 import com.buoobuoo.minecraftenhanced.command.CommandManager;
 import com.buoobuoo.minecraftenhanced.core.block.CustomBlockManager;
 import com.buoobuoo.minecraftenhanced.core.cinematic.SpectatorManager;
+import com.buoobuoo.minecraftenhanced.core.damage.DamageManager;
 import com.buoobuoo.minecraftenhanced.core.dialogue.DialogueManager;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
 import com.buoobuoo.minecraftenhanced.core.event.DatabaseConnectEvent;
 import com.buoobuoo.minecraftenhanced.core.event.listener.AnvilRenamePacketListener;
 import com.buoobuoo.minecraftenhanced.core.event.listener.PlayerInteractNpcPacketListener;
+import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntityDamageByEntityEventListener;
+import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntityDamageEventListener;
 import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntityRegainHealthEventListener;
+import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntitySpawnEventListener;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateSecondEvent;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventoryManager;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
 import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttributeManager;
-import com.buoobuoo.minecraftenhanced.core.npc.NpcManager;
+import com.buoobuoo.minecraftenhanced.core.entity.npc.NpcManager;
 import com.buoobuoo.minecraftenhanced.core.party.PartyManager;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerManager;
 import com.buoobuoo.minecraftenhanced.core.quest.QuestManager;
@@ -50,6 +55,8 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
     private PermissionManager permissionManager;
     private DialogueManager dialogueManager;
     private ItemAttributeManager itemAttributeManager;
+    private EntityManager entityManager;
+    private DamageManager damageManager;
 
     private CommandManager commandManager;
 
@@ -87,6 +94,8 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
         permissionManager = new PermissionManager(this);
         dialogueManager = new DialogueManager(this);
         itemAttributeManager = new ItemAttributeManager(this);
+        entityManager = new EntityManager(this);
+        damageManager = new DamageManager(this);
 
         commandManager = new CommandManager(this);
     }
@@ -102,7 +111,10 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
                 playerManager,
 
                 //mechanic listeners
-                new EntityRegainHealthEventListener()
+                new EntityRegainHealthEventListener(this),
+                new EntityDamageByEntityEventListener(this),
+                new EntitySpawnEventListener(this),
+                new EntityDamageEventListener(this)
         );
 
         //packet listener

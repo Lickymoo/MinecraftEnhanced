@@ -6,22 +6,22 @@ import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.entity.TestEntity;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItems;
-import com.buoobuoo.minecraftenhanced.core.npc.NpcInstance;
-import com.buoobuoo.minecraftenhanced.core.npc.Npcs;
+import com.buoobuoo.minecraftenhanced.core.entity.npc.NpcInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.npc.Npcs;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
-import com.ticxo.modelengine.api.ModelEngineAPI;
-import com.ticxo.modelengine.api.model.ActiveModel;
-import com.ticxo.modelengine.api.model.ModeledEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.*;
@@ -154,18 +154,8 @@ public class EnhCommand extends BaseCommand {
     }
 
     @Subcommand("inv")
-    public void inv(Player player, String modelName){
-        Npcs npc = Npcs.Jayden;
-        NpcInstance pni = new NpcInstance(plugin, npc.getHandler(), player.getLocation(), Bukkit.getOnlinePlayers().toArray(new Player[0]));
-        Entity ent = pni.spawn().getBukkitEntity();
-
-        ActiveModel model = ModelEngineAPI.api.getModelManager().createActiveModel(modelName);
-        Entity mob = player.getWorld().spawnEntity(player.getLocation(), EntityType.HUSK);
-        ModeledEntity modeledEntity = ModelEngineAPI.api.getModelManager().createModeledEntity(ent);
-
-        modeledEntity.addActiveModel(model);
-        modeledEntity.detectPlayers();
-        modeledEntity.setInvisible(true);
+    public void inv(Player player){
+        plugin.getEntityManager().spawnEntity(player.getLocation(), TestEntity.class);
     }
 
     @Subcommand("testboard")

@@ -1,6 +1,7 @@
 package com.buoobuoo.minecraftenhanced.core.item.interfaces;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.damage.DamageInstance;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
 import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttribute;
@@ -10,6 +11,7 @@ import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,21 @@ public abstract class AttributedItem extends CustomItem {
         }
 
         ib.nbtString(plugin, "ATTRIB_LIST", Util.fromList(attribValues));
+    }
+
+    public void onDamage(MinecraftEnhanced plugin, DamageInstance instance){
+        List<ItemAttributeInstance> attributeInstanceList = plugin.getItemAttributeManager().getAttribInstances(instance.getWeapon());
+        for(ItemAttributeInstance attributeInstance : attributeInstanceList){
+            attributeInstance.onDamage(instance);
+        }
+    }
+
+    public ItemAttribute getItemAttribByID(String id){
+        for(ItemAttribute attribute : attributes){
+            if(attribute.getId().equalsIgnoreCase(id))
+                return attribute;
+        }
+        return null;
     }
 }
 

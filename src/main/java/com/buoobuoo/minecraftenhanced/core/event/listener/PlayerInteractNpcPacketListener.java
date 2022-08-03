@@ -2,7 +2,7 @@ package com.buoobuoo.minecraftenhanced.core.event.listener;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.PlayerInteractNpcEvent;
-import com.buoobuoo.minecraftenhanced.core.npc.NpcInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.npc.NpcInstance;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;

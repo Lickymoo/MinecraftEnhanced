@@ -5,7 +5,7 @@ import co.aikar.commands.PaperCommandManager;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.command.impl.*;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItems;
-import com.buoobuoo.minecraftenhanced.core.npc.Npcs;
+import com.buoobuoo.minecraftenhanced.core.entity.npc.Npcs;
 import com.buoobuoo.minecraftenhanced.core.util.EnumUtil;
 import com.buoobuoo.minecraftenhanced.permission.PermissionGroup;
 
