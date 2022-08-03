@@ -7,9 +7,9 @@ import co.aikar.commands.annotation.HelpCommand;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.permission.PermissionGroup;
 import com.buoobuoo.minecraftenhanced.permission.PermissionManager;
-import com.buoobuoo.minecraftenhanced.core.util.Util;
 import org.bukkit.command.CommandSender;
 
 @CommandAlias("permission|perm")

@@ -1,15 +1,12 @@
 package com.buoobuoo.minecraftenhanced.core.item;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.BlockItem;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.Modifier;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.NotStackable;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
-import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
 import org.bukkit.GameMode;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -19,12 +16,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Getter

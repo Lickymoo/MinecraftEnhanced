@@ -2,7 +2,6 @@ package com.buoobuoo.minecraftenhanced.permission;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
-import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 

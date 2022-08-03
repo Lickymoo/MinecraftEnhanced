@@ -2,6 +2,7 @@ package com.buoobuoo.minecraftenhanced.core.item.interfaces;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttributeInstance;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
@@ -9,12 +10,6 @@ import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +26,10 @@ public abstract class AttributedItem extends CustomItem {
 
     public AttributedItem(String id, Material material, int customModelData, String displayName, String... lore) {
         super(id, material, customModelData, displayName, lore);
+    }
+
+    public AttributedItem(String id, MatRepo mat, String displayName, String... lore) {
+        super(id, mat, displayName, lore);
     }
 
     public void addAttributes(ItemAttribute... attributes){

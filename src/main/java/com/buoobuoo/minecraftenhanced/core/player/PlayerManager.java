@@ -2,6 +2,7 @@ package com.buoobuoo.minecraftenhanced.core.player;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateSecondEvent;
+import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.impl.profile.ProfileInventory;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
@@ -76,6 +77,9 @@ public class PlayerManager implements Listener {
         Player player = event.getPlayer();
         PlayerData playerData = getPlayer(player);
 
+        player.getInventory().clear();
+        player.setHealth(20);
+
         //LOAD PLAYER INVENTORY
         Inventory inv = new ProfileInventory(plugin, player).getInventory();
         player.openInventory(inv);
@@ -86,6 +90,11 @@ public class PlayerManager implements Listener {
         //save data
         PlayerData playerData = getPlayer(event.getPlayer());
         playerData.save(plugin);
+
+        //remove all old profiles
+        for(UUID uuid : playerData.getProfileIDs()){
+            removeProfile(uuid);
+        }
 
         playerDataMap.remove(event.getPlayer().getUniqueId());
     }
@@ -111,16 +120,42 @@ public class PlayerManager implements Listener {
         return profileDataMap.containsKey(uuid);
     }
 
-    public void saveAll(){
-        for(PlayerData data : playerDataMap.values()){
-            data.save(plugin);
-        }
-    }
-
     @EventHandler
     public void updateSecond(UpdateSecondEvent event){
         for(PlayerData data : playerDataMap.values()){
             setDisplayPrefix(data);
+        }
+    }
+
+    @EventHandler
+    public void updateTick(UpdateTickEvent event){
+        for(PlayerData data : playerDataMap.values()){
+            if(data.getActiveProfileID() == null)
+                continue;
+
+            Player player = Bukkit.getPlayer(data.getOwnerID());
+            ProfileData profileData = getProfile(data.getActiveProfileID());
+
+            checkHealth(player, profileData);
+
+        }
+    }
+
+    private void checkHealth(Player player, ProfileData profileData) {
+
+        double health = profileData.getHealth();
+
+        //TODO
+        double maxHealth = ProfileData.BASE_HEALTH;
+
+        //DEATH
+        if (health <= 0) {
+            player.setHealth(0);
+            profileData.setHealth(maxHealth);
+            return;
+        }
+        if (!player.isDead()) {
+            player.setHealth((health / maxHealth) * 20);
         }
     }
 
@@ -145,6 +180,10 @@ public class PlayerManager implements Listener {
         }catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void removeProfile(UUID uuid){
+        profileDataMap.remove(uuid);
     }
 }
 

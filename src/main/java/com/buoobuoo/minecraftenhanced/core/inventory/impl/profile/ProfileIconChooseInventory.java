@@ -2,6 +2,7 @@ package com.buoobuoo.minecraftenhanced.core.inventory.impl.profile;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
@@ -31,7 +32,7 @@ public class ProfileIconChooseInventory extends CustomInventory {
             ProfileData profileData = plugin.getPlayerManager().getProfile(uuid);
 
             profileData.setProfileIcon(item.getType());
-            profileData.save(plugin);
+            profileData.save(plugin, false);
 
             Inventory inv = new ProfileEditInventory(plugin, player, uuid).getInventory();
             player.openInventory(inv);
@@ -56,7 +57,7 @@ public class ProfileIconChooseInventory extends CustomInventory {
             inv.setItem(index++, item);
         }
 
-        ItemStack back = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name("&7Return to profile edit").create();
+        ItemStack back = new ItemBuilder(MatRepo.INVISIBLE).name("&7Return to profile edit").create();
         inv.setItem(0, back);
 
         return inv;

@@ -7,7 +7,6 @@ import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 @Getter
 @Setter
@@ -39,6 +38,14 @@ public class CustomItem implements Listener {
         this.displayName = displayName;
         this.lore = lore;
         this.customModelData = customModelData;
+    }
+
+    public CustomItem(String id, MatRepo mat, String displayName, String... lore){
+        this.id = id;
+        this.material = mat.getMat();
+        this.displayName = displayName;
+        this.lore = lore;
+        this.customModelData = mat.getCustomModelData();
     }
 
     protected boolean isApplicable(ItemStack item){

@@ -38,8 +38,8 @@ public class PlayerData {
 
     public boolean setCurrentProfile(UUID profileID){
         if(activeProfileID != null){
-            ProfileData profileData = plugin.getPlayerManager().getProfile(activeProfileID);
-            profileData.save(plugin);
+            save(plugin);
+            plugin.getPlayerManager().removeProfile(activeProfileID);
         }
         activeProfileID = null;
         Player player = Bukkit.getPlayer(ownerID);
@@ -54,18 +54,7 @@ public class PlayerData {
         ProfileData profileData = plugin.getPlayerManager().getProfile(profileID);
         profileData.setOwnerID(ownerID);
         activeProfileID = profileID;
-
-
-        if(profileData.getInventoryContents() != null)
-            player.getInventory().setContents(profileData.getInventoryContents());
-        if(profileData.getArmorContents() != null)
-            player.getInventory().setArmorContents(profileData.getArmorContents());
-
-        if(profileData.getGameMode() != null)
-            player.setGameMode(profileData.getGameMode());
-
-        if(profileData.getLocation() != null)
-            player.teleport(profileData.getLocation());
+        profileData.applyPlayer(player);
 
         return true;
     }

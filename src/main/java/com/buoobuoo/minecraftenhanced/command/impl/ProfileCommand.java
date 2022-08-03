@@ -23,8 +23,6 @@ public class ProfileCommand extends BaseCommand {
     public void def(Player player){
         Inventory inv = new ProfileInventory(plugin, player).getInventory();
         PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
-
-
         playerData.setCurrentProfile(null);
         player.openInventory(inv);
     }

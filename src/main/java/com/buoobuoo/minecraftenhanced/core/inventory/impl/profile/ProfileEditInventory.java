@@ -2,6 +2,7 @@ package com.buoobuoo.minecraftenhanced.core.inventory.impl.profile;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
@@ -9,7 +10,6 @@ import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.UnicodeSpaceUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -46,7 +46,7 @@ public class ProfileEditInventory extends CustomInventory {
             Inventory i = new ProfileRenameInventory(plugin, player, profileUUID, name -> {
                 ProfileData profileData = plugin.getPlayerManager().getProfile(uuid);
                 profileData.setProfileName(name);
-                profileData.save(plugin);
+                profileData.save(plugin, false);
 
                 Inventory i2 = new ProfileEditInventory(plugin, player, profileUUID).getInventory();
                 player.openInventory(i2);
@@ -62,13 +62,13 @@ public class ProfileEditInventory extends CustomInventory {
         PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
         ProfileData profileData = plugin.getPlayerManager().getProfile(uuid);
 
-        ItemStack back = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name("&7Return to profiles").create();
+        ItemStack back = new ItemBuilder(MatRepo.INVISIBLE).name("&7Return to profiles").create();
         inv.setItem(0, back);
 
-        ItemStack rename = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name("&7Rename Profile").lore("&7Current: &r&f" + profileData.getProfileName()).create();
+        ItemStack rename = new ItemBuilder(MatRepo.INVISIBLE).name("&7Rename Profile").lore("&7Current: &r&f" + profileData.getProfileName()).create();
         inv.setItem(17, rename);
 
-        ItemStack delete = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name("&7Delete Profile").create();
+        ItemStack delete = new ItemBuilder(MatRepo.INVISIBLE).name("&7Delete Profile").create();
         inv.setItem(26, delete);
 
         ItemStack icon = new ItemBuilder(profileData.getProfileIcon()).name("&7Click to change profile icon").create();

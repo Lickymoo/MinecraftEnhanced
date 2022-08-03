@@ -22,9 +22,8 @@ import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 public class MongoHook {
 
@@ -105,7 +104,6 @@ public class MongoHook {
 
         Map<String, Object> variableMap = new HashMap<>();
 
-
         for(Field field : object.getClass().getDeclaredFields()) {
             try {
                 //disable meta fields
@@ -118,6 +116,7 @@ public class MongoHook {
 
                 //switches get saved as variables, so ignore that
                 if (field.getAnnotation(DoNotSerialize.class) != null) continue;
+                if (Modifier.isFinal(field.getModifiers())) continue;
 
                 VariableSerializer<Object> serializer = getSerializer(field.getType());
                 Object value = field.get(object);
@@ -137,12 +136,15 @@ public class MongoHook {
             collection.insertOne(newValue);
             document = collection.find(new Document("_id", id)).first();
         }
+        List<Bson> ops = new ArrayList<>();
         for(Map.Entry<String, Object> entrySet : variableMap.entrySet()) {
             if(entrySet.getValue() == null) continue;
+
             Bson bsonValue = new Document(entrySet.getKey(), entrySet.getValue());
             Bson bsonOperation = new Document("$set", bsonValue);
-            collection.updateOne(document, bsonOperation);
+            ops.add(bsonOperation);
         }
+        collection.updateMany(document, ops);
     }
 
     public <T> T loadObject(String id, Class<T> clazz, String collectionName) {
@@ -168,6 +170,7 @@ public class MongoHook {
                     Object value;
 
                     if(field.getAnnotation(DoNotSerialize.class) != null) continue;
+                    if (Modifier.isFinal(field.getModifiers())) continue;
 
                     VariableSerializer<Object> serializer = getSerializer(field.getType());
                     if (serializer != null && document.getString(field.getName()) != null) {

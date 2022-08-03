@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.event.Listener;
 
-import java.util.List;
-
 @Getter
 @Setter
 public abstract class ItemAttribute implements Listener {

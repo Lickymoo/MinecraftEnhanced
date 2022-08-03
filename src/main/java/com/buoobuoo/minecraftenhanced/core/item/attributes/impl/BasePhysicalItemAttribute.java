@@ -1,6 +1,5 @@
 package com.buoobuoo.minecraftenhanced.core.item.attributes.impl;
 
-import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttributeInstance;
 import com.buoobuoo.minecraftenhanced.core.item.attributes.VariableItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;

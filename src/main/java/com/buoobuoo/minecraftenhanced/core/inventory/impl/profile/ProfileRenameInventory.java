@@ -3,6 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.inventory.impl.profile;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.AnvilRenameEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
@@ -18,8 +19,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -53,7 +52,7 @@ public class ProfileRenameInventory extends CustomInventory {
     @Override
     public Inventory getInventory() {
         ProfileData profileData = plugin.getPlayerManager().getProfile(profileUUID);
-        ItemStack item = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name(profileData.getProfileName()).create();
+        ItemStack item = new ItemBuilder(MatRepo.INVISIBLE).name(profileData.getProfileName()).create();
 
         Inventory inv = Bukkit.createInventory(this, InventoryType.ANVIL, Util.formatColour(title));
         inv.setItem(0, item);

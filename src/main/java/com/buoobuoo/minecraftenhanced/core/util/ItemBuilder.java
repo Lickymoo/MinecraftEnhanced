@@ -1,6 +1,7 @@
 package com.buoobuoo.minecraftenhanced.core.util;
 
 
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import org.bukkit.*;
@@ -42,6 +43,14 @@ public class ItemBuilder {
 
     public ItemBuilder(OfflinePlayer skullOwner) {
         this.item = (new ItemBuilder(Material.PLAYER_HEAD)).skullOwner(skullOwner).create();
+        ItemMeta meta = this.item.getItemMeta();
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        item.setItemMeta(meta);
+    }
+
+    public ItemBuilder(MatRepo mat){
+        this.item = new ItemStack(mat.getMat());
+        setCustomModelData(mat.getCustomModelData());
         ItemMeta meta = this.item.getItemMeta();
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         item.setItemMeta(meta);

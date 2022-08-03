@@ -1,7 +1,5 @@
 package com.buoobuoo.minecraftenhanced.core.item.attributes;
 
-import com.buoobuoo.minecraftenhanced.core.util.Pair;
-import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
 
 import java.text.DecimalFormat;

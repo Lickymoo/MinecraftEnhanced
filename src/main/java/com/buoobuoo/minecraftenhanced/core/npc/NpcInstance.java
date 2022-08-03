@@ -83,7 +83,7 @@ public class NpcInstance {
         gameProfile.getProperties().put("textures", new Property("textures", texture, signature));
     }
 
-    public void spawn(){
+    public Entity spawn(){
         npcHandler.onSpawn(entity, getPlayers());
         Util.sendPacket(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, entity), getPlayers());
         Util.sendPacket(new ClientboundAddPlayerPacket(entity), getPlayers());
@@ -95,6 +95,7 @@ public class NpcInstance {
 
         setSkin("Eg2qotZYEF6DVpiGjr2gz76PIsPPLNjDsvbQi4ITgi+SSeuq5FqZ6yu9Eshk58OgkjThAPw9fpwOAech+u2RTxs2iILU5k35ZQZafq6wAVmBO2iII1V1tdhpYldhsQrT7DXWneptElU2PuPclKZtGAz60RcES0ZIdpbbMFaZGhNRO8q18tNb8Qa4UYGq7H0yqn9xYDaJMwtXJObLfBq0bIKKO1tyVRW6GRCUWkC8nrm75jfWWNbEte5PPyEpPQg+Uor/o0ZdbNbstnG3joLuoIAH+fiVRb/mV/jYzniwHRKD8zfnpBwsii6oaxdq4zeAupldcbaBPFscqIoUe80M9/m6fBJi5+WJKP7A/Pv/plHJu+7HYDGeDxE817Q8ajx6ZTB+qgmf+ERxca5PmLyj2Zz8HQ7U6ZSEIY5rIedtahwImvvbShVUrnWfZzXkxFCFmXCoWD+0rZ9MLWPqXtaTMLIETq92H+Eve6nGxG2JZONGoW3Pq+9gINLsnz6Y9gMXZLPiY9iEQo0JREVi+8g52V/lVx76l0WqSKXZXts8p1YF05LHDaC4a99qu5Qnh3UpKIoRXjfct5qs60UGGNhk+l6cIDYmtceSKvir3SL39h96u21f6mcSH1b9SDJekNk2fOeSCDm1s9IYLM67qQCrd4EBMvGiC24cJVlrQki6xQI=",
                 "ewogICJ0aW1lc3RhbXAiIDogMTY1OTA1NzEyMzk2MywKICAicHJvZmlsZUlkIiA6ICIyM2YxYTU5ZjQ2OWI0M2RkYmRiNTM3YmZlYzEwNDcxZiIsCiAgInByb2ZpbGVOYW1lIiA6ICIyODA3IiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzRhZTNmNzJlZDYwMTgzMjZlMTAwYzk0ODcxNzg3ODVhOTA1NGQ3YjgxNDEzOTEzNjVkOGFiNTdhMjUxNDQyNWQiCiAgICB9CiAgfQp9");
+        return entity;
     }
 
     public void destroy(){

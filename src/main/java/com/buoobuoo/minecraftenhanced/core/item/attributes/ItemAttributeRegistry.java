@@ -1,7 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.item.attributes;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.item.CustomItems;
 
 import java.util.HashMap;
 import java.util.Map;

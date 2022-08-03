@@ -9,6 +9,8 @@ import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItems;
 import com.buoobuoo.minecraftenhanced.core.npc.NpcInstance;
 import com.buoobuoo.minecraftenhanced.core.npc.Npcs;
+import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
+import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.ticxo.modelengine.api.ModelEngineAPI;
@@ -153,9 +155,13 @@ public class EnhCommand extends BaseCommand {
 
     @Subcommand("inv")
     public void inv(Player player, String modelName){
+        Npcs npc = Npcs.Jayden;
+        NpcInstance pni = new NpcInstance(plugin, npc.getHandler(), player.getLocation(), Bukkit.getOnlinePlayers().toArray(new Player[0]));
+        Entity ent = pni.spawn().getBukkitEntity();
+
         ActiveModel model = ModelEngineAPI.api.getModelManager().createActiveModel(modelName);
         Entity mob = player.getWorld().spawnEntity(player.getLocation(), EntityType.HUSK);
-        ModeledEntity modeledEntity = ModelEngineAPI.api.getModelManager().createModeledEntity(mob);
+        ModeledEntity modeledEntity = ModelEngineAPI.api.getModelManager().createModeledEntity(ent);
 
         modeledEntity.addActiveModel(model);
         modeledEntity.detectPlayers();
@@ -188,6 +194,20 @@ public class EnhCommand extends BaseCommand {
                 for(ArmorStand ent : player.getLocation().getWorld().getEntitiesByClass(ArmorStand.class)){
                     ent.remove();
                 }
+            }
+        }
+
+        @Subcommand("health")
+        public class health extends BaseCommand{
+
+            @Subcommand("set")
+            public void set(Player player, double amt){
+                PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
+                if(playerData.getActiveProfileID() == null)
+                    return;
+
+                ProfileData profileData = plugin.getPlayerManager().getProfile(playerData.getActiveProfileID());
+                profileData.setHealth(amt);
             }
         }
     }

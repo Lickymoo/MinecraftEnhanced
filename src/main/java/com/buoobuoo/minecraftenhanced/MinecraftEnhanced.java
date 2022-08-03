@@ -1,22 +1,23 @@
 package com.buoobuoo.minecraftenhanced;
 
+import com.buoobuoo.minecraftenhanced.command.CommandManager;
 import com.buoobuoo.minecraftenhanced.core.block.CustomBlockManager;
 import com.buoobuoo.minecraftenhanced.core.cinematic.SpectatorManager;
-import com.buoobuoo.minecraftenhanced.command.CommandManager;
 import com.buoobuoo.minecraftenhanced.core.dialogue.DialogueManager;
 import com.buoobuoo.minecraftenhanced.core.event.DatabaseConnectEvent;
-import com.buoobuoo.minecraftenhanced.core.event.update.UpdateSecondEvent;
 import com.buoobuoo.minecraftenhanced.core.event.listener.AnvilRenamePacketListener;
 import com.buoobuoo.minecraftenhanced.core.event.listener.PlayerInteractNpcPacketListener;
+import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntityRegainHealthEventListener;
+import com.buoobuoo.minecraftenhanced.core.event.update.UpdateSecondEvent;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventoryManager;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
 import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttributeManager;
 import com.buoobuoo.minecraftenhanced.core.npc.NpcManager;
 import com.buoobuoo.minecraftenhanced.core.party.PartyManager;
-import com.buoobuoo.minecraftenhanced.permission.PermissionManager;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerManager;
 import com.buoobuoo.minecraftenhanced.core.quest.QuestManager;
+import com.buoobuoo.minecraftenhanced.permission.PermissionManager;
 import com.buoobuoo.minecraftenhanced.persistence.MongoHook;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -68,7 +69,6 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
     @Override
     public void onDisable(){
         npcManager.cleanup();
-        playerManager.saveAll();
         mongoHook.disable();
     }
 
@@ -99,7 +99,10 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
                 customInventoryManager,
                 npcManager,
                 spectatorManager,
-                playerManager
+                playerManager,
+
+                //mechanic listeners
+                new EntityRegainHealthEventListener()
         );
 
         //packet listener
@@ -124,7 +127,7 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
         }.runTaskTimer(this, 0, 1);
 
     }
-    
+
     //TEMP
     @EventHandler
     public void itemDrop(PlayerDropItemEvent event){

@@ -3,8 +3,6 @@ package com.buoobuoo.minecraftenhanced.persistence.serialization.impl;
 import com.buoobuoo.minecraftenhanced.persistence.serialization.VariableSerializer;
 import org.bukkit.GameMode;
 
-import java.util.UUID;
-
 public class GameModeSerializer extends VariableSerializer<GameMode> {
 
     @Override

@@ -2,13 +2,12 @@ package com.buoobuoo.minecraftenhanced.core.inventory.impl.profile;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
-import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.UnicodeSpaceUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -40,11 +39,11 @@ public class ProfileDeleteInventory extends CustomInventory {
     public Inventory getInventory() {
         Inventory inv = Bukkit.createInventory(this, size, Util.formatColour(title));
 
-        ItemStack yes = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name("&7No").lore("&r&fClick to return").create();
+        ItemStack yes = new ItemBuilder(MatRepo.INVISIBLE).name("&7No").lore("&r&fClick to return").create();
         inv.setItem(19, yes);
         inv.setItem(20, yes);
 
-        ItemStack no = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name("&cYes").lore("&r&fClick to delete profile").create();
+        ItemStack no = new ItemBuilder(MatRepo.INVISIBLE).name("&cYes").lore("&r&fClick to delete profile").create();
         inv.setItem(24, no);
         inv.setItem(26, no);
 

@@ -3,13 +3,16 @@ package com.buoobuoo.minecraftenhanced.core.inventory.impl.profile;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
 import com.buoobuoo.minecraftenhanced.core.inventory.impl.logout.LogoutInventory;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.UnicodeSpaceUtil;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -64,7 +67,7 @@ public class ProfileInventory extends CustomInventory {
                 UUID profileID = playerData.createProfile();
                 ProfileData profileData = plugin.getPlayerManager().getProfile(profileID);
                 profileData.init(player);
-                profileData.save(plugin);
+                profileData.save(plugin, false);
 
                 Inventory i = new ProfileInventory(plugin, player).getInventory();
                 player.openInventory(i);
@@ -109,13 +112,13 @@ public class ProfileInventory extends CustomInventory {
         }
 
         if (!capacity){
-            ItemStack create = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name("&7Create Profile").create();
+            ItemStack create = new ItemBuilder(MatRepo.INVISIBLE).name("&7Create Profile").create();
             inv.setItem(30, create);
             inv.setItem(31, create);
             inv.setItem(32, create);
         }
 
-        ItemStack logout = new ItemBuilder(Material.PAPER).setCustomModelData(1000).name("&7Logout").create();
+        ItemStack logout = new ItemBuilder(MatRepo.INVISIBLE).name("&7Logout").create();
         inv.setItem(27, logout);
         inv.setItem(28, logout);
 

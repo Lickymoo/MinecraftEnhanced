@@ -1,7 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.player;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.permission.PermissionGroup;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -19,7 +18,7 @@ import java.util.UUID;
 @Setter
 public class ProfileData {
 
-    private static final double BASE_HEALTH = 20;
+    public static final double BASE_HEALTH = 20;
 
     private Material profileIcon = Material.WOODEN_SWORD;
     private String profileName;
@@ -33,14 +32,25 @@ public class ProfileData {
     private List<String> completedQuest = new ArrayList<>();
     private List<String> activeQuests = new ArrayList<>();
 
+
+    //meta vars
     private ItemStack[] inventoryContents;
     private ItemStack[] armorContents;
     private Location location;
+    private int selectedSlot;
 
     private GameMode gameMode;
+    private boolean flying;
 
     //stats
     private double health;
+
+
+
+
+
+
+
 
 
     public static ProfileData load(MinecraftEnhanced plugin, UUID id){
@@ -50,17 +60,50 @@ public class ProfileData {
         return profileData;
     }
 
+    public void save(MinecraftEnhanced plugin, boolean metaData) {
+        if (metaData){
+            save(plugin);
+            return;
+        }
+
+        plugin.getMongoHook().saveObject(profileID.toString(), this, "profileData");
+    }
+
     public void save(MinecraftEnhanced plugin){
         Player player = Bukkit.getPlayer(ownerID);
         if(profileIcon == null)
             profileIcon = Material.WOODEN_SWORD;
 
         inventoryContents = player.getInventory().getContents();
+
         armorContents = player.getInventory().getArmorContents();
         location = player.getLocation();
+        selectedSlot = player.getInventory().getHeldItemSlot();
 
         gameMode = player.getGameMode();
+        flying = player.isFlying();
+
         plugin.getMongoHook().saveObject(profileID.toString(), this, "profileData");
+    }
+
+    public void applyPlayer(Player player){
+        if(getInventoryContents() != null) {
+            player.getInventory().setContents(getInventoryContents());
+        }
+
+        if(getArmorContents() != null) {
+            player.getInventory().setArmorContents(getArmorContents());
+
+        }
+
+        if(getGameMode() != null)
+            player.setGameMode(getGameMode());
+
+        if(getLocation() != null)
+            player.teleport(getLocation());
+
+        player.getInventory().setHeldItemSlot(getSelectedSlot());
+        player.setFlying(isFlying());
     }
 
     public void init(Player player){
