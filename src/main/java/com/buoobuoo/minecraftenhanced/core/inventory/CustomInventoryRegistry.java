@@ -32,6 +32,12 @@ public class CustomInventoryRegistry {
 
     public CustomInventory getHandler(Inventory inventory){
         for(CustomInventory inv : customInventoryList){
+            if(inv == null || inventory == null)
+                continue;
+
+            if(inventory.getHolder() == null)
+                continue;
+
             if(inv == inventory.getHolder())
                 return inv;
         }

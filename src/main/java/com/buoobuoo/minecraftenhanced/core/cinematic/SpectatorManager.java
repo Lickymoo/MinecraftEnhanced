@@ -67,7 +67,7 @@ public class SpectatorManager implements Listener {
         Entity stand = getStand(player, loc);
         player.setGameMode(GameMode.SPECTATOR);
         player.setSpectatorTarget(stand);
-        player.getInventory().setHelmet(new ItemBuilder(Material.CARVED_PUMPKIN).coloredName("There was no better way lol").create());
+        player.getInventory().setHelmet(new ItemBuilder(Material.CARVED_PUMPKIN).name("There was no better way lol").create());
 
         return stand;
     }

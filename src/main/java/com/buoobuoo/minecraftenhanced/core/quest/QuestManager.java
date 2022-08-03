@@ -1,7 +1,7 @@
 package com.buoobuoo.minecraftenhanced.core.quest;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
+import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.quest.impl.IntroQuest;
 import com.buoobuoo.minecraftenhanced.core.util.Pair;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
@@ -32,13 +32,13 @@ public class QuestManager {
             return false;
 
         String questID = quest.getQuestID();
-        PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
+        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
         if(playerHasCompletedQuest(player, quest) || playerHasStartedQuest(player, quest))
             return false;
 
         Util.sendDialogueBox(player, CharRepo.UI_PORTRAIT_BOUNCER_TUFF, quest.getQuestName(), quest.getQuestBrief());
 
-        playerData.getActiveQuests().add(activeQuestToString(questID, 0));
+        profileData.getActiveQuests().add(activeQuestToString(questID, 0));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1 ,1);
         return true;
     }
@@ -48,9 +48,9 @@ public class QuestManager {
             return;
 
         String questID = quest.getQuestID();
-        PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
-        playerData.getActiveQuests().remove(getActiveQuestString(player, questID));
-        playerData.getCompletedQuest().add(questID);
+        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+        profileData.getActiveQuests().remove(getActiveQuestString(player, questID));
+        profileData.getCompletedQuest().add(questID);
         quest.onComplete(player);
     }
 
@@ -59,9 +59,9 @@ public class QuestManager {
             return;
 
         String questID = quest.getQuestID();
-        PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
-        playerData.getActiveQuests().remove(getActiveQuestString(player, questID));
-        playerData.getCompletedQuest().remove(questID);
+        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+        profileData.getActiveQuests().remove(getActiveQuestString(player, questID));
+        profileData.getCompletedQuest().remove(questID);
     }
 
     public Quest getQuestByID(String questID){
@@ -84,8 +84,8 @@ public class QuestManager {
             return false;
 
         String questID = quest.getQuestID();
-        PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
-        for(String str : playerData.getCompletedQuest()){
+        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+        for(String str : profileData.getCompletedQuest()){
             if(str.equalsIgnoreCase(questID))
                 return true;
         }
@@ -119,8 +119,8 @@ public class QuestManager {
     }
 
     public Pair<String, Integer> parseActiveQuest(Player player, String questID){
-        PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
-        for(String s : playerData.getActiveQuests()){
+        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+        for(String s : profileData.getActiveQuests()){
             if(s.contains(questID)){
                 String[] str = s.split(":");
                 return Pair.of(str[0], Integer.parseInt(str[1]));
@@ -130,8 +130,8 @@ public class QuestManager {
     }
 
     public String getActiveQuestString(Player player, String questID){
-        PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
-        for(String str : playerData.getActiveQuests()){
+        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+        for(String str : profileData.getActiveQuests()){
             if(str.contains(questID)) {
                 return str;
             }

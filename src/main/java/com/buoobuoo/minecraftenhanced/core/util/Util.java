@@ -17,8 +17,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
 
 public class Util {
     public static int getToolSpeed(ItemStack itemStack){
@@ -117,8 +120,13 @@ public class Util {
     }
 
     public static int randomInt(int min, int max){
-        return (int)(Math.random()*(min-max+1)+max);
+        return ThreadLocalRandom.current().nextInt(min, max);
     }
+
+    public static double randomDouble(double min, double max){
+        return ThreadLocalRandom.current().nextDouble(min, max);
+    }
+
 
     public static void sendPacketGlobal(Packet<?> packet){
         sendPacket(packet, Bukkit.getOnlinePlayers().toArray(new Player[0]));
@@ -181,6 +189,22 @@ public class Util {
                 player.sendMessage("");
             }
         }
+    }
+
+    public static String[] addToArr(String[] arr, String... str){
+        List<String> list = new ArrayList<>();
+        list.addAll(Arrays.asList(arr));
+        list.addAll(Arrays.asList(str));
+        return list.toArray(new String[0]);
+    }
+
+    public static String fromList(List<String> strList){
+        StringBuilder builder = new StringBuilder();
+        for(String str : strList){
+            builder.append(str);
+            builder.append(",");
+        }
+        return builder.toString();
     }
 }
 

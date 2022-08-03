@@ -1,7 +1,7 @@
 package com.buoobuoo.minecraftenhanced.core.inventory.impl;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.event.PartyInviteUpdateEvent;
+import com.buoobuoo.minecraftenhanced.core.event.party.PartyInviteUpdateEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
 import com.buoobuoo.minecraftenhanced.core.party.Party;
 import com.buoobuoo.minecraftenhanced.core.party.PartyManager;
@@ -71,14 +71,14 @@ public class EmptyPartyInventory extends CustomInventory {
     public Inventory getInventory() {
         Inventory inv = Bukkit.createInventory(this, size, Util.formatColour(title));
 
-        ItemStack create = new ItemBuilder(Material.PAPER).coloredName("&7Create Party").setCustomModelData(1000).create();
+        ItemStack create = new ItemBuilder(Material.PAPER).name("&7Create Party").setCustomModelData(1000).create();
         inv.setItem(27, create);
         inv.setItem(28, create);
 
         int index = 0;
         for(Party party : partyManager.getInvitedParties(player)){
             Player leader = Bukkit.getPlayer(party.getLeader());
-            ItemStack head = new ItemBuilder(Material.PLAYER_HEAD).skullOwner(leader).coloredName(leader.getDisplayName() + "'s Party").coloredLore("&7Click to join party").create();
+            ItemStack head = new ItemBuilder(Material.PLAYER_HEAD).skullOwner(leader).name(leader.getDisplayName() + "'s Party").lore("&7Click to join party").create();
 
             ItemMeta meta = head.getItemMeta();
             PersistentDataContainer pdc = meta.getPersistentDataContainer();

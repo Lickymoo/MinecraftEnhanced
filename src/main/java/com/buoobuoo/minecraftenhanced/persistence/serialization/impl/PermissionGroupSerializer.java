@@ -1,6 +1,6 @@
 package com.buoobuoo.minecraftenhanced.persistence.serialization.impl;
 
-import com.buoobuoo.minecraftenhanced.core.permission.PermissionGroup;
+import com.buoobuoo.minecraftenhanced.permission.PermissionGroup;
 import com.buoobuoo.minecraftenhanced.persistence.serialization.VariableSerializer;
 
 public class PermissionGroupSerializer extends VariableSerializer<PermissionGroup> {

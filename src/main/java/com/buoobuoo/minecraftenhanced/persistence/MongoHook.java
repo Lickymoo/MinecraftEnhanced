@@ -2,13 +2,10 @@ package com.buoobuoo.minecraftenhanced.persistence;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.DatabaseConnectEvent;
-import com.buoobuoo.minecraftenhanced.core.permission.PermissionGroup;
+import com.buoobuoo.minecraftenhanced.permission.PermissionGroup;
 import com.buoobuoo.minecraftenhanced.persistence.serialization.DoNotSerialize;
 import com.buoobuoo.minecraftenhanced.persistence.serialization.VariableSerializer;
-import com.buoobuoo.minecraftenhanced.persistence.serialization.impl.ItemStackSerializer;
-import com.buoobuoo.minecraftenhanced.persistence.serialization.impl.LocationSerializer;
-import com.buoobuoo.minecraftenhanced.persistence.serialization.impl.PermissionGroupSerializer;
-import com.buoobuoo.minecraftenhanced.persistence.serialization.impl.UUIDSerializer;
+import com.buoobuoo.minecraftenhanced.persistence.serialization.impl.*;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -18,7 +15,9 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
@@ -48,6 +47,8 @@ public class MongoHook {
         registerSerializer(ItemStack[].class, new ItemStackSerializer());
         registerSerializer(Location.class, new LocationSerializer());
         registerSerializer(PermissionGroup.class, new PermissionGroupSerializer());
+        registerSerializer(GameMode.class, new GameModeSerializer());
+        registerSerializer(Material.class, new MaterialSerializer());
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this::init, 1);
     }
@@ -187,6 +188,39 @@ public class MongoHook {
         }
 
         return object;
+    }
+
+    public void saveValue(String id, String columnName, Object data, String collectionName) {
+        this.collection = mongoDatabase.getCollection(collectionName);
+        Document found = collection.find(new Document("_id", id)).first();
+        if(found == null) {
+            VariableSerializer<Object> serializer = getSerializer(data.getClass());
+            if (serializer != null) {
+                data = serializer.serialize(data);
+            }
+
+            Document document = new Document("_id", id);
+            document.append(columnName, data);
+            collection.insertOne(document);
+        }else {
+            Bson updatedValue = new Document(columnName, data);
+            Bson updateOperation = new Document("$set", updatedValue);
+            collection.updateOne(found, updateOperation);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getValue(String id, String columnName, Class<T> clazz, String collectionName) {
+        if(mongoDatabase != null && collectionName != null)
+            this.collection = mongoDatabase.getCollection(collectionName);
+        Document document = collection.find(new Document("_id", id)).first();
+        if(document == null) return null;
+        VariableSerializer<Object> serializer = getSerializer(clazz);
+        if (serializer != null) {
+            return (T) serializer.deserialize(document.getString(columnName));
+        }else{
+            return (T) document.get(columnName);
+        }
     }
 }
 

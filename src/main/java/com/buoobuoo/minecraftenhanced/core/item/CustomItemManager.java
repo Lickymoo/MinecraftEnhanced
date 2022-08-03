@@ -1,7 +1,11 @@
 package com.buoobuoo.minecraftenhanced.core.item;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.BlockItem;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.Modifier;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.NotStackable;
+import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
 import org.bukkit.GameMode;
@@ -19,17 +23,22 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Getter
 public class CustomItemManager implements Listener {
 
     private final MinecraftEnhanced plugin;
     private final CustomItemRegistry registry;
+    private final List<Class<? extends Modifier>> modifierHandlers = new ArrayList<>();
 
     public CustomItemManager(MinecraftEnhanced plugin){
         this.plugin = plugin;
         this.registry = new CustomItemRegistry(plugin);
+
+        this.modifierHandlers.add(NotStackable.class);
     }
 
     public ItemStack getItem(CustomItems item){
@@ -38,20 +47,24 @@ public class CustomItemManager implements Listener {
 
     public ItemStack getItem(CustomItem item){
 
-        ItemStack itemStack = new ItemStack(item.getMaterial());
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.setLore(Util.formatColour(Arrays.asList(item.getLore())));
-        meta.setDisplayName(Util.formatColour("&r" + item.getDisplayName()));
+        ItemBuilder ib = new ItemBuilder(item.getMaterial());
+        ib.name(item.getRarity().getColor() + item.getDisplayName());
+        item.onCreate(plugin, ib);
 
         if(item.getCustomModelData() != 0)
-            meta.setCustomModelData(item.getCustomModelData());
+            ib.setCustomModelData(item.getCustomModelData());
 
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        NamespacedKey key = new NamespacedKey(plugin, "ITEM_ID");
-        pdc.set(key, PersistentDataType.STRING, item.getId());
+        ib.nbtString(plugin, "ITEM_ID", item.getId());
 
-        itemStack.setItemMeta(meta);
-        return itemStack;
+        List<Class<?>> interfaces = List.of(item.getClass().getInterfaces());
+        for(Class<? extends Modifier> cl : modifierHandlers){
+            if (interfaces.contains(cl)){
+                Modifier modifier = cl.cast(item);
+                modifier.modifierCreate(plugin, ib);
+            }
+        }
+
+        return ib.create();
     }
 
     //Handler for placing a custom block (dont ask why its in this manager class lol)

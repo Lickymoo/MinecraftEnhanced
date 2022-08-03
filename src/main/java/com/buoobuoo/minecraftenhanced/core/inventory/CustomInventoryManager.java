@@ -22,22 +22,29 @@ public class CustomInventoryManager implements Listener {
     @EventHandler
     public void onClose(InventoryCloseEvent event){
         Inventory inv = event.getInventory();
+        if(inv == null)
+            return;
+
         CustomInventory handler = registry.getHandler(inv);
         registry.unregisterInventory(handler);
+        if(handler != null)
+            handler.onClose(event);
     }
 
     @EventHandler
     public void onClick(InventoryClickEvent event){
         Inventory inv = event.getClickedInventory();
-        if(inv != event.getWhoClicked().getOpenInventory().getTopInventory())
-            return;
 
         CustomInventory handler = registry.getHandler(inv);
         if(handler == null)
             return;
 
-        event.setCancelled(true);
+        if(inv != event.getWhoClicked().getOpenInventory().getTopInventory()) {
+            event.setCancelled(true);
+            return;
+        }
 
+        event.setCancelled(true);
 
         int slot = event.getSlot();
         if(handler.slotMap.get(slot) != null)

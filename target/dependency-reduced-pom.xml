@@ -79,6 +79,11 @@
   </build>
   <repositories>
     <repository>
+      <id>nexus</id>
+      <name>Lumine Public</name>
+      <url>https://mvn.lumine.io/repository/maven-public/</url>
+    </repository>
+    <repository>
       <id>spigot-repo</id>
       <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
@@ -100,6 +105,12 @@
       <groupId>com.comphenix.protocol</groupId>
       <artifactId>ProtocolLib</artifactId>
       <version>4.8.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.ticxo.modelengine</groupId>
+      <artifactId>api</artifactId>
+      <version>R2.5.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

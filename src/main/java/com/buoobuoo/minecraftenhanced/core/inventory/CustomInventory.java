@@ -1,9 +1,11 @@
 package com.buoobuoo.minecraftenhanced.core.inventory;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.util.Consumer;
@@ -11,6 +13,7 @@ import org.bukkit.util.Consumer;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public abstract class CustomInventory implements InventoryHolder, Listener {
     protected final MinecraftEnhanced plugin;
     protected final Player player;
@@ -18,6 +21,7 @@ public abstract class CustomInventory implements InventoryHolder, Listener {
 
     protected String title;
     protected int size;
+    protected boolean cancelBottomClick = true;
 
     public CustomInventory(MinecraftEnhanced plugin, Player player, String title, int size){
         this.plugin = plugin;
@@ -47,6 +51,9 @@ public abstract class CustomInventory implements InventoryHolder, Listener {
 
     public boolean isApplicable(Inventory inventory){
         return inventory.getHolder() == this;
+    }
+
+    public void onClose(InventoryCloseEvent event){
     }
 }
 

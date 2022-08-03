@@ -1,8 +1,8 @@
 package com.buoobuoo.minecraftenhanced.core.party;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.event.PartyInviteUpdateEvent;
-import com.buoobuoo.minecraftenhanced.core.event.PartyUpdateEvent;
+import com.buoobuoo.minecraftenhanced.core.event.party.PartyInviteUpdateEvent;
+import com.buoobuoo.minecraftenhanced.core.event.party.PartyUpdateEvent;
 import com.buoobuoo.minecraftenhanced.core.util.JSONUtil;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import net.md_5.bungee.api.chat.TextComponent;

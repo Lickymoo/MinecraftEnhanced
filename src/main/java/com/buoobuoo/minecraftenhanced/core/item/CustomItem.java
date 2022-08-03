@@ -1,19 +1,26 @@
 package com.buoobuoo.minecraftenhanced.core.item;
 
+import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 @Getter
+@Setter
 public class CustomItem implements Listener {
     protected CustomItemManager manager;
 
-    private String id;
-    private String displayName;
-    private String[] lore;
-    private Material material;
-    private int customModelData;
+    protected String id;
+    protected String displayName;
+    protected String[] lore;
+    protected Material material;
+    protected int customModelData;
+
+    protected ItemRarity rarity = ItemRarity.COMMON;
 
     public void addManager(CustomItemManager manager){
         this.manager = manager;
@@ -36,5 +43,10 @@ public class CustomItem implements Listener {
 
     protected boolean isApplicable(ItemStack item){
         return this.manager.getRegistry().isApplicable(this, item);
+    }
+
+    public void onCreate(MinecraftEnhanced plugin, ItemBuilder ib){
+        ib.lore(lore);
+        ib.lore(10, "&r&f" + rarity.getIcon().getCh());
     }
 }

@@ -3,10 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.util;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -14,6 +11,9 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.profile.PlayerProfile;
 
 import java.lang.reflect.Field;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 public class ItemBuilder {
     private ItemStack item;
+    private Map<Integer, List<String>> loreTierMap = new HashMap<>();
 
     public ItemBuilder(Material material) {
         this.item = new ItemStack(material);
@@ -53,46 +54,51 @@ public class ItemBuilder {
 
     public ItemBuilder name(String name) {
         ItemMeta meta = this.item.getItemMeta();
-        meta.setDisplayName(name);
-        this.item.setItemMeta(meta);
-        return this;
-    }
-
-    public ItemBuilder coloredName(String name) {
-        ItemMeta meta = this.item.getItemMeta();
         meta.setDisplayName(Util.formatColour(name));
         this.item.setItemMeta(meta);
         return this;
     }
 
-    public ItemBuilder lore(String... lore) {
+    public ItemBuilder nbtString(Plugin plugin, String id, String val){
         ItemMeta meta = this.item.getItemMeta();
-        meta.setLore(Arrays.asList(lore));
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        pdc.set(new NamespacedKey(plugin, id), PersistentDataType.STRING, val);
         this.item.setItemMeta(meta);
         return this;
     }
 
+    public ItemBuilder nbtDouble(Plugin plugin, String id, double val) {
+        ItemMeta meta = this.item.getItemMeta();
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        pdc.set(new NamespacedKey(plugin, id), PersistentDataType.DOUBLE, val);
+        this.item.setItemMeta(meta);
+        return this;
+    }
+
+    public ItemBuilder lore(String... lore) {
+        List<String> tierList = getLoreTier(0);
+        tierList.addAll(List.of(lore));
+        return this;
+    }
 
     public ItemBuilder lore(List<String> lore) {
-        ItemMeta meta = this.item.getItemMeta();
-        meta.setLore(lore);
-        this.item.setItemMeta(meta);
+        List<String> tierList = getLoreTier(0);
+        tierList.addAll(lore);
         return this;
     }
 
-    public ItemBuilder coloredLore(String... lore) {
-        ItemMeta meta = this.item.getItemMeta();
-        meta.setLore(Util.formatColour(Arrays.asList(lore)));
-        this.item.setItemMeta(meta);
+    public ItemBuilder lore(int tier, String... lore) {
+        List<String> tierList = getLoreTier(tier);
+        tierList.addAll(List.of(lore));
         return this;
     }
 
-    public ItemBuilder coloredLore(List<String> lore) {
-        ItemMeta meta = this.item.getItemMeta();
-        meta.setLore(Util.formatColour(lore));
-        this.item.setItemMeta(meta);
+    public ItemBuilder lore(int tier, List<String> lore) {
+        List<String> tierList = getLoreTier(tier);
+        tierList.addAll(lore);
         return this;
     }
+
 
     public ItemBuilder skullOwner(OfflinePlayer player) {
         SkullMeta meta = (SkullMeta)this.item.getItemMeta();
@@ -226,6 +232,68 @@ public class ItemBuilder {
     }
 
     public ItemStack create() {
+        ItemMeta meta = this.item.getItemMeta();
+
+
+        int highest = 0;
+        for(int i : loreTierMap.keySet()){
+            highest = Math.max(highest, i);
+        }
+
+        List<String> lore = new ArrayList<>();
+        for(int i = 0; i < highest+1; i++){
+            List<String> list = loreTierMap.getOrDefault(i, null);
+            if(list == null)
+                continue;
+
+            lore.addAll(list);
+        }
+
+        meta.setLore(Util.formatColour(lore));
+        this.item.setItemMeta(meta);
         return this.item;
     }
+
+    private List<String> getLoreTier(int tier){
+        if(loreTierMap.get(tier) == null){
+            List<String> tierList = new ArrayList<>();
+            loreTierMap.put(tier, tierList);
+        }
+
+        return loreTierMap.get(tier);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
