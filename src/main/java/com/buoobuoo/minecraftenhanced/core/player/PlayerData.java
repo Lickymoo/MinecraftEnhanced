@@ -41,6 +41,7 @@ public class PlayerData {
             save(plugin);
             plugin.getPlayerManager().removeProfile(activeProfileID);
         }
+
         activeProfileID = null;
         Player player = Bukkit.getPlayer(ownerID);
         player.getInventory().clear();

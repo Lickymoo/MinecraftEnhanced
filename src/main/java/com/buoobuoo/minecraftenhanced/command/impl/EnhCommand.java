@@ -3,28 +3,30 @@ package com.buoobuoo.minecraftenhanced.command.impl;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Subcommand;
-import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.entity.TestEntity;
+import com.buoobuoo.minecraftenhanced.core.ability.Ability;
+import com.buoobuoo.minecraftenhanced.core.ability.AbilityManager;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.event.update.PlayerLevelUpEvent;
+import com.buoobuoo.minecraftenhanced.core.item.AbilityGemItem;
+import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItems;
-import com.buoobuoo.minecraftenhanced.core.entity.npc.NpcInstance;
-import com.buoobuoo.minecraftenhanced.core.entity.npc.Npcs;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
-import com.buoobuoo.minecraftenhanced.core.util.Util;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
-import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scoreboard.*;
+import org.bukkit.scheduler.BukkitRunnable;
 
 @CommandAlias("enh")
 public class EnhCommand extends BaseCommand {
@@ -33,114 +35,6 @@ public class EnhCommand extends BaseCommand {
 
     public EnhCommand(MinecraftEnhanced plugin){
         this.plugin = plugin;
-    }
-
-    @Subcommand("give")
-    @CommandCompletion("@custom-items")
-    public void give(Player player, CustomItems item){
-        ItemStack stack = plugin.getCustomItemManager().getItem(item);
-
-        player.getInventory().addItem(stack);
-    }
-
-    @Subcommand("give")
-    @CommandCompletion("@custom-items")
-    public void give(Player player, CustomItems item, int amount){
-        ItemStack stack = plugin.getCustomItemManager().getItem(item);
-        stack.setAmount(amount);
-
-        player.getInventory().addItem(stack);
-    }
-
-    @Subcommand("npc spawn")
-    @CommandCompletion("@npcs")
-    public void spawn(Player player, Npcs npc){
-        Location loc = player.getLocation();
-
-        NpcInstance pni = new NpcInstance(plugin, npc.getHandler(), loc, player);
-        pni.spawn();
-
-        player.sendMessage("Successfully spawned npc (Ent ID: " + pni.getEntity().getId() + ", Instance ID: " + pni.getId() + ")");
-    }
-
-    @Subcommand("npc spawn")
-    @CommandCompletion("@npcs @players")
-    public void spawn(Player player, Npcs npc, OnlinePlayer... players){
-        Location loc = player.getLocation();
-
-        Player[] bPlayers = new Player[players.length];
-        for(int i = 0; i < players.length; i++){
-            bPlayers[i] = players[i].getPlayer();
-        }
-
-        NpcInstance pni = new NpcInstance(plugin, npc.getHandler(), loc, bPlayers);
-        pni.spawn();
-
-        player.sendMessage("Successfully spawned npc (Ent ID: " + pni.getEntity().getId() + ", Instance ID: " + pni.getId() + ")");
-    }
-
-    @Subcommand("npc spawn all")
-    @CommandCompletion("@npcs")
-    public void spawnGroup(Player player, Npcs npc){
-        Location loc = player.getLocation();
-
-        NpcInstance pni = new NpcInstance(plugin, npc.getHandler(), loc, Bukkit.getOnlinePlayers().toArray(new Player[0]));
-        pni.spawn();
-
-        player.sendMessage("Successfully spawned npc (Ent ID: " + pni.getEntity().getId() + ", Instance ID: " + pni.getId() + ")");
-    }
-
-    @Subcommand("npc destroy ent")
-    public void destroyEnt(Player player, int id){
-        Location loc = player.getLocation();
-
-        NpcInstance pni = plugin.getNpcManager().getInstanceByEntityID(id);
-        pni.destroy();
-
-        player.sendMessage("Successfully destroyed npc: (Ent ID: " + id + ")");
-    }
-
-    @Subcommand("npc destroy inst")
-    public void destroyInst(Player player, int id){
-        Location loc = player.getLocation();
-
-        NpcInstance pni = plugin.getNpcManager().getInstanceByInstID(id);
-        pni.destroy();
-
-        player.sendMessage("Successfully destroyed npc: (Inst ID: " + id + ")");
-    }
-
-    @Subcommand("npc move ent")
-    public void moveEnt(Player player, int id){
-        Location loc = player.getLocation();
-
-        NpcInstance pni = plugin.getNpcManager().getInstanceByEntityID(id);
-        pni.moveEntityTo(loc.getX(), loc.getY(), loc.getZ());
-    }
-
-    @Subcommand("npc move inst")
-    public void moveInst(Player player, int id){
-        Location loc = player.getLocation();
-
-        NpcInstance pni = plugin.getNpcManager().getInstanceByInstID(id);
-        pni.moveEntityTo(loc.getX(), loc.getY(), loc.getZ());
-    }
-
-
-    //test cmds
-    @Subcommand("intro")
-    public void intro(Player player){
-        Location loc = player.getLocation();
-        Location npcLoc = loc.clone().add(1, 0 , 3);
-
-        loc.setPitch(0);
-        loc.setYaw(0);
-
-        NpcInstance pni = new NpcInstance(plugin, Npcs.Jayden.getHandler(), npcLoc, player);
-        pni.spawn();
-
-        plugin.getSpectatorManager().viewLocNoVignette(player, loc.add(0, 1, 0));
-        player.sendTitle("", "", 0, 10000, 0);
     }
 
     @Subcommand("skull")
@@ -153,35 +47,87 @@ public class EnhCommand extends BaseCommand {
         player.getInventory().addItem(item);
     }
 
-    @Subcommand("inv")
-    public void inv(Player player){
-        plugin.getEntityManager().spawnEntity(player.getLocation(), TestEntity.class);
-    }
-
-    @Subcommand("testboard")
-    public void testboard(Player player){
-        Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-                ScoreboardManager manager = Bukkit.getScoreboardManager();
-                final Scoreboard board = manager.getNewScoreboard();
-                final Objective objective = board.registerNewObjective("test", "dummy");
-                objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-                objective.setDisplayName(Util.formatColour("&8Quests"));
-                Score score = objective.getScore(Util.formatColour("&f\uF006"));
-                score.setScore(10);
-                player.setScoreboard(board);
-
-        },0, 20 * 10);
-    }
-
     @Subcommand("debug")
     public class debug extends BaseCommand{
+
+        @Subcommand("route")
+        public void route(Player player){
+            plugin.getRouteManager().showRoute(player);
+        }
+
+        @Subcommand("route")
+        public void route(Player player, int id){
+
+        }
+
+        @Subcommand("give")
+        public class give extends BaseCommand{
+
+            @Subcommand("item")
+            @CommandCompletion("@custom-items")
+            public void item(Player player, CustomItems item){
+                ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+                ItemStack stack = plugin.getCustomItemManager().getItem(profileData, item);
+                stack = item.getHandler().update(plugin, profileData, stack);
+
+                player.getInventory().addItem(stack);
+            }
+
+            @Subcommand("item")
+            @CommandCompletion("@custom-items")
+            public void item(Player player, CustomItems item, int amount){
+                ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+                ItemStack stack = plugin.getCustomItemManager().getItem(profileData, item);
+                stack.setAmount(amount);
+                stack = item.getHandler().update(plugin, profileData, stack);
+
+                player.getInventory().addItem(stack);
+            }
+
+            @Subcommand("ability")
+            @CommandCompletion("@abilities")
+            public void ability(Player player, String abilityID){
+                ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+                AbilityManager abilityManager = plugin.getAbilityManager();
+                CustomItemManager customItemManager = plugin.getCustomItemManager();
+
+                Ability ability = abilityManager.getAbilityByID(abilityID);
+
+                AbilityGemItem gemItem = new AbilityGemItem(ability);
+                ItemStack item = customItemManager.getItem(profileData, gemItem);
+                player.getInventory().addItem(item);
+            }
+        }
+
+        @Subcommand("spawn")
+        @CommandCompletion("@custom-entities")
+        public void spawn(Player player, String entityClass){
+            EntityManager entityManager = plugin.getEntityManager();
+            Class<? extends CustomEntity> clazz = entityManager.getHandlerClassByName(entityClass);
+            CustomEntity ent = entityManager.spawnEntity(clazz, player.getLocation().clone().subtract(5, 0 ,0));
+
+            new BukkitRunnable(){
+                @Override
+                public void run(){
+                    Location loc = player.getLocation();
+                    Path path = ent.getPathfinderMob().getNavigation().createPath(new BlockPos(loc.getX(), loc.getY(), loc.getZ()), 100);
+                    if(path != null) {
+                        path.advance();
+                    }else{
+                        Bukkit.broadcastMessage("NULL PATH");
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(plugin, 0, 1);
+        }
 
         @Subcommand("clear")
         public class clear extends BaseCommand{
 
-            @Subcommand("armorStand")
-            public void armorStand(Player player){
-                for(ArmorStand ent : player.getLocation().getWorld().getEntitiesByClass(ArmorStand.class)){
+            @Default
+            @CommandCompletion("@vanilla-entity-type")
+            public void type(Player player, EntityType type){
+                for(Entity ent : player.getLocation().getWorld().getEntitiesByClass(type.getEntityClass())){
                     ent.remove();
                 }
             }
@@ -198,6 +144,55 @@ public class EnhCommand extends BaseCommand {
 
                 ProfileData profileData = plugin.getPlayerManager().getProfile(playerData.getActiveProfileID());
                 profileData.setHealth(amt);
+            }
+        }
+
+        @Subcommand("level")
+        public class level extends BaseCommand{
+
+            @Subcommand("set")
+            public void set(Player player, int amt){
+                PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
+                if(playerData.getActiveProfileID() == null)
+                    return;
+
+                ProfileData profileData = plugin.getPlayerManager().getProfile(playerData.getActiveProfileID());
+                profileData.setLevel(amt);
+
+                Bukkit.getPluginManager().callEvent(new PlayerLevelUpEvent(player));
+            }
+        }
+
+        @Subcommand("mana")
+        public class mana extends BaseCommand{
+
+            @Subcommand("set")
+            public void set(Player player, int amt){
+                PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
+                if(playerData.getActiveProfileID() == null)
+                    return;
+
+                ProfileData profileData = plugin.getPlayerManager().getProfile(playerData.getActiveProfileID());
+                profileData.setMana(amt);
+
+                Bukkit.getPluginManager().callEvent(new PlayerLevelUpEvent(player));
+            }
+        }
+
+
+        @Subcommand("exp")
+        public class exp extends BaseCommand{
+
+            @Subcommand("set")
+            public void set(Player player, int amt){
+                PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
+                if(playerData.getActiveProfileID() == null)
+                    return;
+
+                ProfileData profileData = plugin.getPlayerManager().getProfile(playerData.getActiveProfileID());
+                profileData.setExperience(amt);
+
+                Bukkit.getPluginManager().callEvent(new PlayerLevelUpEvent(player));
             }
         }
     }

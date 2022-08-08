@@ -1,23 +1,20 @@
 package com.buoobuoo.minecraftenhanced.core.event;
 
-import com.buoobuoo.minecraftenhanced.core.entity.npc.NpcInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.NpcEntity;
 import lombok.Getter;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.PlayerEvent;
 
-public class PlayerInteractNpcEvent extends Event {
+public class PlayerInteractNpcEvent extends PlayerEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
     @Getter
-    private Player player;
+    private final NpcEntity handler;
 
-    @Getter
-    private NpcInstance handler;
-
-    public PlayerInteractNpcEvent(Player player, NpcInstance handler){
-        this.player = player;
+    public PlayerInteractNpcEvent(Player player, NpcEntity handler){
+        super(player);
         this.handler = handler;
     }
 

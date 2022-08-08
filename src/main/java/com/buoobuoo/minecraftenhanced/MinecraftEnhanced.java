@@ -1,33 +1,34 @@
 package com.buoobuoo.minecraftenhanced;
 
 import com.buoobuoo.minecraftenhanced.command.CommandManager;
+import com.buoobuoo.minecraftenhanced.core.ability.AbilityManager;
+import com.buoobuoo.minecraftenhanced.core.area.AreaManager;
 import com.buoobuoo.minecraftenhanced.core.block.CustomBlockManager;
-import com.buoobuoo.minecraftenhanced.core.cinematic.SpectatorManager;
+import com.buoobuoo.minecraftenhanced.core.chat.ChatManager;
 import com.buoobuoo.minecraftenhanced.core.damage.DamageManager;
 import com.buoobuoo.minecraftenhanced.core.dialogue.DialogueManager;
 import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
 import com.buoobuoo.minecraftenhanced.core.event.DatabaseConnectEvent;
-import com.buoobuoo.minecraftenhanced.core.event.listener.AnvilRenamePacketListener;
-import com.buoobuoo.minecraftenhanced.core.event.listener.PlayerInteractNpcPacketListener;
-import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntityDamageByEntityEventListener;
-import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntityDamageEventListener;
-import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntityRegainHealthEventListener;
-import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.EntitySpawnEventListener;
+import com.buoobuoo.minecraftenhanced.core.event.listener.*;
+import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.*;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateSecondEvent;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventoryManager;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
-import com.buoobuoo.minecraftenhanced.core.item.attributes.ItemAttributeManager;
-import com.buoobuoo.minecraftenhanced.core.entity.npc.NpcManager;
+import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.ItemAttributeManager;
+import com.buoobuoo.minecraftenhanced.core.navigation.RouteManager;
 import com.buoobuoo.minecraftenhanced.core.party.PartyManager;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerManager;
 import com.buoobuoo.minecraftenhanced.core.quest.QuestManager;
+import com.buoobuoo.minecraftenhanced.core.vfx.cinematic.SpectatorManager;
 import com.buoobuoo.minecraftenhanced.permission.PermissionManager;
 import com.buoobuoo.minecraftenhanced.persistence.MongoHook;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.GameRule;
+import org.bukkit.World;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,6 +42,8 @@ import org.bukkit.util.Vector;
 @Getter
 public class MinecraftEnhanced extends JavaPlugin implements Listener{
 
+    public static final String MAIN_WORLD_NAME = "world";
+
     private MongoHook mongoHook;
 
     private ProtocolManager protocolManager;
@@ -48,7 +51,6 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
     private CustomItemManager customItemManager;
     private CustomInventoryManager customInventoryManager;
     private SpectatorManager spectatorManager;
-    private NpcManager npcManager;
     private PartyManager partyManager;
     private QuestManager questManager;
     private PlayerManager playerManager;
@@ -57,6 +59,10 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
     private ItemAttributeManager itemAttributeManager;
     private EntityManager entityManager;
     private DamageManager damageManager;
+    private AbilityManager abilityManager;
+    private ChatManager chatManager;
+    private AreaManager areaManager;
+    private RouteManager routeManager;
 
     private CommandManager commandManager;
 
@@ -71,11 +77,14 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
         initTimers();
 
         instance = this;
+        for(World world : Bukkit.getWorlds()){
+            world.setGameRule(GameRule.KEEP_INVENTORY, true);
+        }
     }
 
     @Override
     public void onDisable(){
-        npcManager.cleanup();
+        playerManager.saveAll();
         mongoHook.disable();
     }
 
@@ -87,7 +96,6 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
         customItemManager = new CustomItemManager(this);
         customInventoryManager = new CustomInventoryManager(this);
         spectatorManager = new SpectatorManager(this);
-        npcManager = new NpcManager(this);
         partyManager = new PartyManager(this);
         questManager = new QuestManager(this);
         playerManager = new PlayerManager(this);
@@ -96,8 +104,14 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
         itemAttributeManager = new ItemAttributeManager(this);
         entityManager = new EntityManager(this);
         damageManager = new DamageManager(this);
+        abilityManager = new AbilityManager(this);
+        chatManager = new ChatManager(this);
+        areaManager = new AreaManager(this);
+        routeManager = new RouteManager(this);
 
         commandManager = new CommandManager(this);
+
+        questManager.init();
     }
 
     public void initListeners(){
@@ -106,15 +120,24 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
                 customBlockManager,
                 customItemManager,
                 customInventoryManager,
-                npcManager,
                 spectatorManager,
                 playerManager,
+                entityManager,
+                abilityManager,
+                chatManager,
+                areaManager,
 
                 //mechanic listeners
                 new EntityRegainHealthEventListener(this),
                 new EntityDamageByEntityEventListener(this),
                 new EntitySpawnEventListener(this),
-                new EntityDamageEventListener(this)
+                new EntityDamageEventListener(this),
+                new EntityCombustEventListener(this),
+                new ItemRequirementEventListener(this),
+                new PlayerManagerItemListener(this),
+                new PlayerCreativeInteractEventListener(this),
+                new BlockGrowEventListener(this),
+                new NpcTeamTagListener(this)
         );
 
         //packet listener
@@ -167,5 +190,9 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
         for(Listener listener : listeners){
             getServer().getPluginManager().registerEvents(listener, this);
         }
+    }
+
+    public static World getMainWorld(){
+        return Bukkit.getWorld(MAIN_WORLD_NAME);
     }
 }

@@ -84,6 +84,14 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder nbtInt(Plugin plugin, String id, int val) {
+        ItemMeta meta = this.item.getItemMeta();
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        pdc.set(new NamespacedKey(plugin, id), PersistentDataType.INTEGER, val);
+        this.item.setItemMeta(meta);
+        return this;
+    }
+
     public ItemBuilder lore(String... lore) {
         List<String> tierList = getLoreTier(0);
         tierList.addAll(List.of(lore));
@@ -108,6 +116,11 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder clearLore(){
+        loreTierMap.clear();
+        this.item.getItemMeta().setLore(new ArrayList<>());
+        return this;
+    }
 
     public ItemBuilder skullOwner(OfflinePlayer player) {
         SkullMeta meta = (SkullMeta)this.item.getItemMeta();
@@ -270,6 +283,14 @@ public class ItemBuilder {
         }
 
         return loreTierMap.get(tier);
+    }
+
+    public ItemMeta getMetaRaw(){
+        return this.item.getItemMeta();
+    }
+
+    public ItemStack getItemStackRaw(){
+        return this.item;
     }
 }
 

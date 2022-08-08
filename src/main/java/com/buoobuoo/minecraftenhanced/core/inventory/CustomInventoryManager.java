@@ -2,6 +2,7 @@ package com.buoobuoo.minecraftenhanced.core.inventory;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import lombok.Getter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -33,18 +34,24 @@ public class CustomInventoryManager implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event){
-        Inventory inv = event.getClickedInventory();
+        Inventory clickedInventory = event.getClickedInventory();
+        Inventory inv = event.getInventory();
+        Player player = (Player)event.getWhoClicked();
+        boolean isTopInventory = false;
+
+        if(clickedInventory == player.getOpenInventory().getTopInventory())
+            isTopInventory = true;
 
         CustomInventory handler = registry.getHandler(inv);
         if(handler == null)
             return;
 
-        if(inv != event.getWhoClicked().getOpenInventory().getTopInventory()) {
-            event.setCancelled(true);
+        event.setCancelled(true);
+
+        if(!isTopInventory){
+            handler.onBottomClick(event);
             return;
         }
-
-        event.setCancelled(true);
 
         int slot = event.getSlot();
         if(handler.slotMap.get(slot) != null)

@@ -4,9 +4,22 @@ import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateSecondEvent;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.impl.profile.ProfileInventory;
+import com.buoobuoo.minecraftenhanced.core.player.tempmodifier.TemporaryStatModifier;
+import com.buoobuoo.minecraftenhanced.core.quest.Quest;
+import com.buoobuoo.minecraftenhanced.core.quest.QuestManager;
+import com.buoobuoo.minecraftenhanced.core.status.StatusEffect;
+import com.buoobuoo.minecraftenhanced.core.util.Hologram;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
+import com.buoobuoo.minecraftenhanced.core.util.unicode.UnicodeSpaceUtil;
+import com.buoobuoo.minecraftenhanced.core.vfx.particle.ParticleDirectory;
+import lombok.Getter;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,13 +28,18 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Getter
 public class PlayerManager implements Listener {
     private final MinecraftEnhanced plugin;
 
@@ -59,6 +77,11 @@ public class PlayerManager implements Listener {
         profileDataMap.put(uuid, profileData);
 
         return profileData;
+    }
+
+    public boolean hasActive(Player player){
+        PlayerData playerData = getPlayer(player);
+        return playerData.getActiveProfileID() != null;
     }
 
     //Rank tag
@@ -122,41 +145,181 @@ public class PlayerManager implements Listener {
 
     @EventHandler
     public void updateSecond(UpdateSecondEvent event){
-        for(PlayerData data : playerDataMap.values()){
-            setDisplayPrefix(data);
+        for(PlayerData data : playerDataMap.values()) {
+            Player player = Bukkit.getPlayer(data.getOwnerID());
+
+            if (player == null)
+                continue;
+
+            if (data.getActiveProfileID() == null) {
+                player.getInventory().setItem(8, null);
+            } else {
+                if (player.getGameMode() == GameMode.SPECTATOR)
+                    continue;
+
+                ProfileData profileData = getProfile(data.getActiveProfileID());
+                ProfileStatInstance instance = new ProfileStatInstance(plugin, profileData);
+                for(TemporaryStatModifier statModifier : profileData.getTemporaryStatModifiers()){
+                    statModifier.getInstanceConsumer().accept(instance);
+                    profileData.getTemporaryStatModifiers().remove(statModifier);
+                }
+
+                profileData.setStatInstance(instance);
+
+                //regen
+                double mana = profileData.getMana();
+                double health = profileData.getHealth();
+                profileData.setMana(Math.min(mana + instance.getManaRegenPS(), instance.getMaxMana()));
+                profileData.setHealth(Math.min(health + instance.getHealthRegenPS(), instance.getMaxHealth()));
+            }
         }
     }
+
+    private String statusBar = "";
 
     @EventHandler
     public void updateTick(UpdateTickEvent event){
         for(PlayerData data : playerDataMap.values()){
-            if(data.getActiveProfileID() == null)
+            Player player = Bukkit.getPlayer(data.getOwnerID());
+            if(player == null)
                 continue;
 
-            Player player = Bukkit.getPlayer(data.getOwnerID());
+            if(data.getActiveProfileID() == null) {
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(""));
+                continue;
+            }
+
+            if(player.getGameMode() == GameMode.SPECTATOR)
+                continue;
+
+            setDisplayPrefix(data);
             ProfileData profileData = getProfile(data.getActiveProfileID());
+            if(profileData.getStatInstance() == null)
+                profileData.setStatInstance(new ProfileStatInstance(plugin, profileData));
+
+
+            //Status effect bar
+            statusBar = UnicodeSpaceUtil.getNeg(1);
+
+            int maxStatusEffectIcons = 20;
+            int iconsIndex = 0;
+            for(StatusEffect effect : profileData.getStatusEffects()){
+                statusBar += effect.getIcon();
+                statusBar += UnicodeSpaceUtil.getNeg(1);
+
+                iconsIndex++;
+            }
+
+            statusBar += UnicodeSpaceUtil.getPos(1 + (9 * (maxStatusEffectIcons - iconsIndex)) - 76);
 
             checkHealth(player, profileData);
+            checkMana(player, profileData);
+            checkLevel(player, profileData);
 
+            player.setWalkSpeed(Math.max(0, (float) profileData.getStatInstance().getWalkSpeed()));
+
+            if(player.getGameMode() == GameMode.SURVIVAL)
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(statusBar));
+
+            player.setFoodLevel(20);
+            checkStart(profileData);
+        }
+    }
+
+    private void checkLevel(Player player, ProfileData profileData){
+        player.setLevel(profileData.getLevel());
+
+        int level = profileData.getLevel();
+        int requiredExp = 25 * level * (1 + level);
+        int currentExp = profileData.getExperience();
+
+        if(currentExp >= requiredExp){
+            ParticleDirectory.LEVELUP.playEffect(plugin, player.getLocation(), 1, 2.5, 3);
+            profileData.setLevel(level+1);
+            profileData.setExperience(currentExp-requiredExp);
+
+            List<Entity> entityList = Hologram.spawnHologram(plugin, player.getLocation().clone().add(0, 1.5, 0), false, 40, CharRepo.TAG_LEVEL_UP.getCh());
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for(Entity ent : entityList){
+                        if(ent == null || ent.isDead())
+                            this.cancel();
+
+                        Location loc = ent.getLocation();
+                        loc.add(0, .05, 0);
+                        ent.teleport(loc);
+                    }
+                }
+
+            }.runTaskTimer(plugin, 0, 1);
+        }
+
+        float progress = Util.clamp((float)currentExp / (float)requiredExp, 0, 1);
+        player.setExp(progress);
+    }
+
+    private void checkMana(Player player, ProfileData profileData) {
+
+        double mana = profileData.getMana();
+
+        double maxMana = profileData.getStatInstance().getMaxMana();
+
+        if(mana > maxMana){
+            mana = maxMana;
+            profileData.setMana(mana);
+        }
+
+        double val = Math.floor((mana / maxMana) * 20d) / 2;
+
+        double fullBalls = Math.floor(val);
+        double halfBalls = Math.ceil(val - Math.floor(val));
+        double emptyBalls = 10 - (fullBalls + halfBalls);
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < emptyBalls; i++) {
+            sb.append(UnicodeSpaceUtil.getNeg(2));
+            sb.append(CharRepo.MANA_BALL_EMPTY);
+        }
+        for (int i = 0; i < halfBalls; i++) {
+            sb.append(UnicodeSpaceUtil.getNeg(2));
+            sb.append(CharRepo.MANA_BALL_HALF);
+        }
+        for (int i = 0; i < fullBalls; i++) {
+            sb.append(UnicodeSpaceUtil.getNeg(2));
+            sb.append(CharRepo.MANA_BALL_FULL);
+        }
+
+        if (player.getGameMode() == GameMode.SURVIVAL) {
+            statusBar += sb.toString();
+        }else{
+            statusBar += "";
         }
     }
 
     private void checkHealth(Player player, ProfileData profileData) {
-
         double health = profileData.getHealth();
 
-        //TODO
-        double maxHealth = ProfileData.BASE_HEALTH;
+        double maxHealth = profileData.getStatInstance().getMaxHealth();
 
         //DEATH
         if (health <= 0) {
             player.setHealth(0);
             profileData.setHealth(maxHealth);
+            profileData.setMana(ProfileData.BASE_MANA);
             return;
         }
+        if(health > maxHealth){
+            health = maxHealth;
+            profileData.setHealth(maxHealth);
+        }
+
         if (!player.isDead()) {
             player.setHealth((health / maxHealth) * 20);
         }
+
     }
 
     private void setDisplayPrefix(PlayerData playerData) {
@@ -170,6 +333,7 @@ public class PlayerManager implements Listener {
             Scoreboard scoreboard = plugin.getServer().getScoreboardManager().getMainScoreboard();
             Team team = scoreboard.getTeam(player.getName());
 
+
             if(team == null)
                 team = scoreboard.registerNewTeam(player.getName());
 
@@ -177,15 +341,87 @@ public class PlayerManager implements Listener {
             prefix = prefix + (playerData.getGroup().getGroupPrefix() != null ? playerData.getGroup().getGroupPrefix() + " " : "");
             team.setPrefix(Util.formatColour(prefix));
             team.addEntry(player.getName());
+
+            Objective objective = null;
+
+            if(scoreboard.getObjective("showhealth") == null)
+                objective = scoreboard.registerNewObjective("showhealth", "dummy", "");
+            else
+                objective = scoreboard.getObjective("showhealth");
+
+            objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
+            objective.setDisplayName(CharRepo.HEART.getCh());
+            objective.getScore(player.getName()).setScore((int)profileData.getHealth());
+
+
         }catch(Exception e) {
             e.printStackTrace();
         }
+
     }
 
     public void removeProfile(UUID uuid){
         profileDataMap.remove(uuid);
     }
+
+    public void saveAll(){
+        for(PlayerData playerData : playerDataMap.values()){
+            playerData.save(plugin);
+        }
+    }
+
+    public boolean tempStatModifiersHasClass(ProfileData profileData, Class<?> clazz){
+        for(TemporaryStatModifier stat : profileData.getTemporaryStatModifiers()){
+            if(stat.getModifyingClass() == clazz)
+                return true;
+        }
+        return false;
+    }
+
+    public void checkStart(ProfileData profileData){
+        //check if player has started
+
+        Player player = Bukkit.getPlayer(profileData.getOwnerID());
+
+        QuestManager questManager = plugin.getQuestManager();
+        Quest introQuest = questManager.getQuestByID("INTRO_1_QUEST");
+        if(!questManager.playerHasStartedQuest(player, introQuest) && !questManager.playerHasCompletedQuest(player, introQuest)){
+            beginStory(profileData);
+        }
+    }
+
+    public void beginStory(ProfileData profileData){
+        Player player = Bukkit.getPlayer(profileData.getOwnerID());
+
+        QuestManager questManager = plugin.getQuestManager();
+        Quest intro1Quest = questManager.getQuestByID("INTRO_1_QUEST");
+        questManager.beginQuest(player, intro1Quest, true);
+
+
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

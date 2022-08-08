@@ -1,6 +1,7 @@
 package com.buoobuoo.minecraftenhanced.core.item;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,6 +54,18 @@ public class CustomItem implements Listener {
     }
 
     public void onCreate(MinecraftEnhanced plugin, ItemBuilder ib){
+        ib.lore(lore);
+        ib.lore(10, "&r&f" + rarity.getIcon().getCh());
+    }
+
+    public ItemStack update(MinecraftEnhanced plugin, ProfileData profileData, ItemStack item){
+        ItemBuilder builder = new ItemBuilder(item);
+        update(plugin, profileData, builder);
+        return builder.create();
+    }
+
+    public void update(MinecraftEnhanced plugin, ProfileData profileData, ItemBuilder ib){
+        ib.clearLore();
         ib.lore(lore);
         ib.lore(10, "&r&f" + rarity.getIcon().getCh());
     }

@@ -1,9 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.item;
 
-import com.buoobuoo.minecraftenhanced.core.item.impl.IceSwordItem;
-import com.buoobuoo.minecraftenhanced.core.item.impl.MysteryBoxItem;
-import com.buoobuoo.minecraftenhanced.core.item.impl.TitaniumIngotItem;
-import com.buoobuoo.minecraftenhanced.core.item.impl.TitaniumOreItem;
+import com.buoobuoo.minecraftenhanced.core.item.impl.*;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -15,7 +12,13 @@ public enum CustomItems {
     TITANIUM_ORE(new TitaniumOreItem()),
     TITANIUM_INGOT(new TitaniumIngotItem()),
     MYSTERY_BOX(new MysteryBoxItem()),
-    ICE_SWORD(new IceSwordItem());
+
+    TEST_BOW(new TestBowItem()),
+    ICE_SWORD(new IceSwordItem()),
+
+    BUBYS_HELMET(new BubysHelmetItem()),
+
+    ABILITY_GEM(new AbilityGemItem(null));
 
     private CustomItem handler;
     CustomItems(CustomItem handler){

@@ -1,6 +1,7 @@
 package com.buoobuoo.minecraftenhanced.persistence;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.ability.AbilityCastType;
 import com.buoobuoo.minecraftenhanced.core.event.DatabaseConnectEvent;
 import com.buoobuoo.minecraftenhanced.permission.PermissionGroup;
 import com.buoobuoo.minecraftenhanced.persistence.serialization.DoNotSerialize;
@@ -24,6 +25,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MongoHook {
 
@@ -48,6 +51,9 @@ public class MongoHook {
         registerSerializer(PermissionGroup.class, new PermissionGroupSerializer());
         registerSerializer(GameMode.class, new GameModeSerializer());
         registerSerializer(Material.class, new MaterialSerializer());
+        registerSerializer(String[].class, new StringArraySerializer());
+        registerSerializer(AbilityCastType.class, new AbilityCastTypeSerializer());
+        registerSerializer(AbilityCastType[].class, new AbilityCastTypeArraySerializer());
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this::init, 1);
     }

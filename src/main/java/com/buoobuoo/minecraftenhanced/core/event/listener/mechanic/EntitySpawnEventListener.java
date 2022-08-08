@@ -2,8 +2,9 @@ package com.buoobuoo.minecraftenhanced.core.event.listener.mechanic;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftArmorStand;
-import org.bukkit.entity.*;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;

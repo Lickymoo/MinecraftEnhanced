@@ -2,7 +2,8 @@ package com.buoobuoo.minecraftenhanced.core.quest;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
-import com.buoobuoo.minecraftenhanced.core.quest.impl.IntroQuest;
+import com.buoobuoo.minecraftenhanced.core.quest.impl.story.intro.Intro1Quest;
+import com.buoobuoo.minecraftenhanced.core.quest.impl.story.intro.Intro2Quest;
 import com.buoobuoo.minecraftenhanced.core.util.Pair;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
@@ -20,14 +21,22 @@ public class QuestManager {
 
     public QuestManager(MinecraftEnhanced plugin){
         this.plugin = plugin;
+    }
 
+    public void init(){
         //Quests
         registerQuests(
-            new IntroQuest(this)
+                new Intro1Quest(plugin),
+                new Intro2Quest(plugin)
         );
     }
 
+
     public boolean beginQuest(Player player, Quest quest){
+        return beginQuest(player, quest, false);
+    }
+
+    public boolean beginQuest(Player player, Quest quest, boolean silent){
         if(quest == null)
             return false;
 
@@ -36,10 +45,13 @@ public class QuestManager {
         if(playerHasCompletedQuest(player, quest) || playerHasStartedQuest(player, quest))
             return false;
 
-        Util.sendDialogueBox(player, CharRepo.UI_PORTRAIT_BOUNCER_TUFF, quest.getQuestName(), quest.getQuestBrief());
+        if(!silent) {
+            Util.sendDialogueBox(player, CharRepo.UI_PORTRAIT_BOUNCER_TUFF, "&7&lQuest started - &f&l" + quest.getQuestName(), quest.getQuestBrief());
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1, 1);
+        }
 
+        quest.onStart(player);
         profileData.getActiveQuests().add(activeQuestToString(questID, 0));
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1 ,1);
         return true;
     }
 

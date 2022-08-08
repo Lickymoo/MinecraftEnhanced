@@ -1,8 +1,9 @@
 package com.buoobuoo.minecraftenhanced.core.event.listener;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.NpcEntity;
 import com.buoobuoo.minecraftenhanced.core.event.PlayerInteractNpcEvent;
-import com.buoobuoo.minecraftenhanced.core.entity.npc.NpcInstance;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
@@ -36,7 +37,12 @@ public class PlayerInteractNpcPacketListener {
 
                 Player player = event.getPlayer();
                 int id = packet.getIntegers().read(0) ;
-                NpcInstance handler = pluginE.getNpcManager().getInstanceByEntityID(id);
+
+                CustomEntity entityHandler = pluginE.getEntityManager().getHandlerByID(id);
+                if(!(entityHandler instanceof NpcEntity))
+                    return;
+
+                NpcEntity handler = (NpcEntity) entityHandler;
 
 
 
@@ -48,3 +54,29 @@ public class PlayerInteractNpcPacketListener {
         });
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

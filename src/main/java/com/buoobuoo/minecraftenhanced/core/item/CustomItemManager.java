@@ -4,6 +4,7 @@ import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.BlockItem;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.Modifier;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.NotStackable;
+import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import lombok.Getter;
 import org.bukkit.GameMode;
@@ -34,15 +35,15 @@ public class CustomItemManager implements Listener {
         this.modifierHandlers.add(NotStackable.class);
     }
 
-    public ItemStack getItem(CustomItems item){
-        return getItem(item.getHandler());
+    public ItemStack getItem(ProfileData profileData, CustomItems item){
+        return getItem(profileData, item.getHandler());
     }
 
-    public ItemStack getItem(CustomItem item){
+    public ItemStack getItem(ProfileData profileData, CustomItem item){
 
         ItemBuilder ib = new ItemBuilder(item.getMaterial());
         ib.name(item.getRarity().getColor() + item.getDisplayName());
-        item.onCreate(plugin, ib);
+        item.onCreate(plugin,  ib);
 
         if(item.getCustomModelData() != 0)
             ib.setCustomModelData(item.getCustomModelData());

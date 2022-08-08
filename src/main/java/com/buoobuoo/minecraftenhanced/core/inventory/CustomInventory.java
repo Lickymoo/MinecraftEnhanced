@@ -2,6 +2,7 @@ package com.buoobuoo.minecraftenhanced.core.inventory;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -46,7 +47,7 @@ public abstract class CustomInventory implements InventoryHolder, Listener {
 
     @Override
     public Inventory getInventory() {
-        return null;
+        return Bukkit.createInventory(this, size, title);
     }
 
     public boolean isApplicable(Inventory inventory){
@@ -54,6 +55,10 @@ public abstract class CustomInventory implements InventoryHolder, Listener {
     }
 
     public void onClose(InventoryCloseEvent event){
+    }
+
+    public void onBottomClick(InventoryClickEvent event){
+
     }
 }
 

@@ -1,5 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.util;
 
+import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.ToolType;
 import com.buoobuoo.minecraftenhanced.core.block.CustomBlock;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
@@ -10,16 +11,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.nio.charset.Charset;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Util {
@@ -119,10 +122,12 @@ public class Util {
     }
 
     public static int randomInt(int min, int max){
+        if(min == max) return min;
         return ThreadLocalRandom.current().nextInt(min, max);
     }
 
     public static double randomDouble(double min, double max){
+        if(min == max) return min;
         return ThreadLocalRandom.current().nextDouble(min, max);
     }
 
@@ -169,9 +174,9 @@ public class Util {
 
     public static void sendDialogueBox(Player player, CharRepo icon, String... strs){
         strs = padEmpty(strs, 6);
-        player.sendMessage(CharRepo.UI_DIALOGUE_BORDER + UnicodeSpaceUtil.getNeg(47) + icon  + UnicodeSpaceUtil.getPos(1) + " " + strs[0]);
+        player.sendMessage(Util.formatColour(CharRepo.UI_DIALOGUE_BORDER + UnicodeSpaceUtil.getNeg(47) + icon  + UnicodeSpaceUtil.getPos(1) + " " + strs[0]));
         for(int i = 1; i < strs.length; i++){
-            player.sendMessage("             " + strs[i]);
+            player.sendMessage(Util.formatColour("             " + strs[i]));
         }
     }
 
@@ -204,6 +209,148 @@ public class Util {
             builder.append(",");
         }
         return builder.toString();
+    }
+
+    public static String formatDouble(double value) {
+        String[] suffixes = {"K", "M", "B", "T", "Qad", "Qin", "Sext", "Sept", "Oct", "Non", "Dec", "Und", "Duod", "Tred", "Quat", "Quind", "Sexd", "Septe", "Octo", "Nov", "Vigin"};
+        if(value > 1000) {
+            for (int pwr = 3; pwr <= 63; pwr += 3) {
+                int index = (pwr / 3) - 1;
+
+                double powVal = Math.pow(10, pwr);
+                if (value < powVal) {
+                    String str = String.format("%.2f" + suffixes[index - 1], value / Math.pow(10, pwr - 3));
+                    str = str.replace(".00", "");
+                    return str;
+                }
+            }
+        }
+
+        String str = String.format("%.0f", value);
+        str = str.replace(".00", "");
+        return str;
+    }
+
+    public static float clamp(float val, float min, float max){
+        if(Float.isNaN(val))
+            return 0;
+
+        if(val < min)
+            return min;
+        if(val > max)
+            return max;
+
+        return val;
+    }
+
+    public static String[] removeOccurrences(String[] arr, String str){
+        List<Integer> marks = new ArrayList<>();
+        for(int i = 0; i < arr.length; i++){
+            if(arr[i] == null)
+                continue;
+
+            if(arr[i].equals(str))
+                marks.add(i);
+        }
+
+        for(int i : marks){
+            arr[i] = null;
+        }
+        return arr;
+    }
+
+    public static String getNBTString(MinecraftEnhanced plugin, ItemStack item, String tag){
+        ItemMeta meta = item.getItemMeta();
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        return pdc.get(new NamespacedKey(plugin, tag), PersistentDataType.STRING);
+    }
+
+    public static boolean hasEmptyStr(String[] arr){
+        for (String obj : arr) {
+            if (obj == null || isEmpty(obj))
+                return true;
+        }
+        return false;
+    }
+
+    public static String[] insertEmptyStr(String[] arr, String val) {
+        for(int i = 0; i < arr.length; i++){
+            if(arr[i] == null ||  isEmpty(arr[i]) || arr[i].equals("null")) {
+                arr[i] = val;
+                return arr;
+            }
+        }
+        return arr;
+    }
+
+    public static <T> boolean hasEmpty(T[] arr) {
+        for (T obj : arr) {
+            if (obj == null)
+                return true;
+        }
+        return false;
+    }
+
+    public static <T> T[] insertEmpty(T[] arr, T val) {
+        for(int i = 0; i < arr.length; i++){
+            if(arr[i] == null) {
+                arr[i] = val;
+                return arr;
+            }
+        }
+        return arr;
+    }
+
+    public static boolean isEmpty(String str){
+        if(str == null)
+            return true;
+        if(str.isEmpty())
+            return true;
+        if(str.isBlank())
+            return true;
+
+        return false;
+    }
+
+    public static <T> boolean arrContains(T[] arr, T obj){
+        for(T o : arr){
+            if(o == null)
+                continue;
+
+            if(o.equals(obj))
+                return true;
+        }
+        return false;
+    }
+
+    public static String[] stringToArr(String str){
+        return str.split(",");
+    }
+
+    public static String arrToString(String[] arr){
+        StringBuilder sb = new StringBuilder();
+        for(String str : arr){
+            sb.append(str);
+            sb.append(",");
+        }
+        return sb.toString();
+    }
+
+    public static <T> T[] setArrSize(T[] arr, int size){
+        return Arrays.copyOf(arr, size);
+    }
+
+    public static String randomString(){
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
+
+        String generatedString = random.ints(leftLimit, rightLimit + 1)
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+        return generatedString;
     }
 }
 

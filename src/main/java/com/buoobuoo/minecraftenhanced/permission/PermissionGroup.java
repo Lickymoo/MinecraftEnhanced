@@ -11,7 +11,7 @@ import java.util.List;
 
 public enum PermissionGroup{
 
-    ADMIN("ADMIN", CharRepo.RANK_ADMIN_TAG, null, "*", "clustercore.admin"),
+    ADMIN("ADMIN", CharRepo.RANK_ADMIN_TAG, null, "*", "me.admin"),
     DEVELOPER("DEV", CharRepo.RANK_DEVELOPER_TAG, ADMIN),
     MEMBER("MEMBER", "" , null);
 
@@ -52,5 +52,9 @@ public enum PermissionGroup{
             perms.addAll(inheritance.getAllPerms());
             return perms;
         }
+    }
+
+    public boolean hasPermission(String str){
+        return getAllPerms().contains(str);
     }
 }

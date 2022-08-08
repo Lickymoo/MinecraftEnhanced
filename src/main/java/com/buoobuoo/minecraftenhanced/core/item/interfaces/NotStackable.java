@@ -8,7 +8,7 @@ import java.util.UUID;
 public interface NotStackable extends Modifier{
 
     @Override
-    public default void modifierCreate(MinecraftEnhanced plugin, ItemBuilder ib){
+    default void modifierCreate(MinecraftEnhanced plugin, ItemBuilder ib){
         ib.nbtString(plugin, "RAND_ID", UUID.randomUUID().toString());
     }
 }
