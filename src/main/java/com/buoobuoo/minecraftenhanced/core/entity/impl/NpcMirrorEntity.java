@@ -1,11 +1,11 @@
 package com.buoobuoo.minecraftenhanced.core.entity.impl;
 
+import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.pathfinding.MoveToLocationGoal;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.potion.PotionEffect;
@@ -19,6 +19,13 @@ public class NpcMirrorEntity extends Zombie implements CustomEntity {
         this.setAggressive(false);
         this.setInvulnerable(true);
         this.setSilent(true);
+        this.setCanBreakDoors(false);
+        this.setBoundingBox(new AABB(0, 0, 0, 0, 0, 0));
+    }
+
+    @Override
+    public void registerGoals(){
+        this.goalSelector.addGoal(0, new MoveToLocationGoal(MinecraftEnhanced.getInstance().getEntityManager(), this, 1.5));
     }
 
     @Override
@@ -44,7 +51,7 @@ public class NpcMirrorEntity extends Zombie implements CustomEntity {
 
     @Override
     public double maxHealth() {
-        return 0;
+        return 10;
     }
 
     @Override

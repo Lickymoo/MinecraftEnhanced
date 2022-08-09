@@ -37,8 +37,6 @@ public class Intro1Quest extends Quest {
 
     @Override
     public void onComplete(Player player) {
-        player.teleport(new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 195, 51, 282));
-        player.resetPlayerWeather();
         questManager.beginQuest(player, questManager.getQuestByID("INTRO_2_QUEST"));
     }
 }

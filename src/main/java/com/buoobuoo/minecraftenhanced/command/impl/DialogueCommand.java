@@ -4,6 +4,8 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.Default;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.event.DialogueNextEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 
@@ -19,5 +21,11 @@ public class DialogueCommand extends BaseCommand {
     @Default
     public void def(Player player){
         plugin.getDialogueManager().incrementDialogue(player);
+    }
+
+    @Default
+    public void def(Player player, String id){
+        DialogueNextEvent event = new DialogueNextEvent(player, id);
+        Bukkit.getPluginManager().callEvent(event);
     }
 }

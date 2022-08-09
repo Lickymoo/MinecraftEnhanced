@@ -6,19 +6,15 @@ import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.PathfinderMob;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public interface NpcEntity extends CustomEntity {
 
@@ -36,6 +32,9 @@ public interface NpcEntity extends CustomEntity {
         pdc.set(new NamespacedKey(plugin, "ENT_ID"), PersistentDataType.STRING, entityID());
         pdc.set(new NamespacedKey(plugin, "HEALTH"), PersistentDataType.DOUBLE, maxHealth());
         pdc.set(new NamespacedKey(plugin, "DAMAGE"), PersistentDataType.DOUBLE, damage());
+
+        onSpawn();
+        plugin.getEntityManager().registerEntities(this);
     }
 
     default void show(Player player){

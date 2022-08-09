@@ -40,42 +40,43 @@ public class RouteManager {
     public ArrayDeque<Location> getRoutePoints(Route route){
         ArrayDeque<Location> deque = new ArrayDeque<>();
 
-        Location loc1 = route.getRoutePoints()[0];
-        Location loc2 = route.getRoutePoints()[1];
 
-        double x1 = loc1.getX();
-        double x2 = loc2.getX();
+        for(int index = 1; index < route.getRoutePoints().length; index++) {
+            Location loc1 = route.getRoutePoints()[index];
+            Location loc2 = route.getRoutePoints()[index-1];
 
-        double y1 = loc1.getY();
-        double y2 = loc2.getY();
+            double x1 = loc1.getX();
+            double x2 = loc2.getX();
 
-        double z1 = loc1.getZ();
-        double z2 = loc2.getZ();
+            double y1 = loc1.getY();
+            double y2 = loc2.getY();
 
-        //2d
-        double dist = Math.sqrt(Math.pow(x1-x2, 2) + Math.pow(z1-z2,2));
+            double z1 = loc1.getZ();
+            double z2 = loc2.getZ();
 
-        for(int i = 0; i < dist; i+= 1){
-            double t = i/dist;
-            double nX = (1-t)*x2 + (t*x1);
-            double nZ = (1-t)*z2 + (t*z1);
-            double nY = (1-t)*y2 + (t*y1);
+            //2d
+            double dist = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
 
-            Location loc = new Location(loc1.getWorld(), nX, nY, nZ);
-            //get block loc
-            loc = loc.getBlock().getLocation().add(.5, 0, .5);
+            for (int i = 0; i < dist; i += 5) {
+                double t = i / dist;
+                double nX = (1 - t) * x2 + (t * x1);
+                double nZ = (1 - t) * z2 + (t * z1);
+                double nY = (1 - t) * y2 + (t * y1);
 
-            //find solid block
-            while(loc.getBlock().isPassable()){
-                loc.subtract(0, 1, 0);
+                Location loc = new Location(loc1.getWorld(), nX, nY, nZ);
+                //get block loc
+                loc = loc.getBlock().getLocation().add(.5, 0, .5);
+
+                //find solid block
+                while (loc.getBlock().isPassable()) {
+                    loc.subtract(0, 1, 0);
+                }
+
+                //add 1
+                loc.add(0, 1, 0);
+                deque.add(loc);
             }
-
-            //add 1
-            loc.add(0, 1, 0);
-            deque.add(loc);
         }
-
-        Bukkit.broadcastMessage("Generated route with " + deque.size() + " points");
         return deque;
     }
 

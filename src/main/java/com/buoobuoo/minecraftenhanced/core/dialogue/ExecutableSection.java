@@ -1,5 +1,8 @@
 package com.buoobuoo.minecraftenhanced.core.dialogue;
 
+import org.bukkit.Bukkit;
+import org.bukkit.event.player.PlayerInteractEvent;
+
 import java.util.function.Consumer;
 
 public class ExecutableSection extends Section{

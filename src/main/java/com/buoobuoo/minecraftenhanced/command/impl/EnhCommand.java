@@ -17,16 +17,15 @@ import com.buoobuoo.minecraftenhanced.core.item.CustomItems;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.pathfinder.Path;
+import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
+import com.buoobuoo.minecraftenhanced.rework.quest.QuestLine;
+import com.buoobuoo.minecraftenhanced.rework.quest.impl.TestQuest;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 @CommandAlias("enh")
 public class EnhCommand extends BaseCommand {
@@ -55,9 +54,15 @@ public class EnhCommand extends BaseCommand {
             plugin.getRouteManager().showRoute(player);
         }
 
-        @Subcommand("route")
-        public void route(Player player, int id){
+        @Subcommand("test")
+        public void test(Player player){
+            TestQuest questLine = new TestQuest(plugin);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                questLine.setDeterminant(player, "killed rat", true);
+                }, 80);
 
+            plugin.registerEvents(questLine);
+            questLine.start(player);
         }
 
         @Subcommand("give")
@@ -104,21 +109,7 @@ public class EnhCommand extends BaseCommand {
         public void spawn(Player player, String entityClass){
             EntityManager entityManager = plugin.getEntityManager();
             Class<? extends CustomEntity> clazz = entityManager.getHandlerClassByName(entityClass);
-            CustomEntity ent = entityManager.spawnEntity(clazz, player.getLocation().clone().subtract(5, 0 ,0));
-
-            new BukkitRunnable(){
-                @Override
-                public void run(){
-                    Location loc = player.getLocation();
-                    Path path = ent.getPathfinderMob().getNavigation().createPath(new BlockPos(loc.getX(), loc.getY(), loc.getZ()), 100);
-                    if(path != null) {
-                        path.advance();
-                    }else{
-                        Bukkit.broadcastMessage("NULL PATH");
-                        this.cancel();
-                    }
-                }
-            }.runTaskTimer(plugin, 0, 1);
+            CustomEntity ent = entityManager.spawnEntity(clazz, player.getLocation());
         }
 
         @Subcommand("clear")

@@ -2,15 +2,12 @@ package com.buoobuoo.minecraftenhanced.core.entity.interf;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-
-import java.nio.file.Path;
 
 public interface CustomEntity {
 
@@ -31,6 +28,10 @@ public interface CustomEntity {
     default void onSpawn(){}
 
     //inbuilt
+    default void onDestroy(){
+
+    }
+
     default double calculateExpDrop(int n){
         int level = entityLevel();
         double g = 25 * level * (1 + level);
@@ -52,6 +53,7 @@ public interface CustomEntity {
 
         //Spawn hologram for tags
 
+        plugin.getEntityManager().registerEntities(this);
         onSpawn();
     }
 

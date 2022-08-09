@@ -56,6 +56,7 @@ E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\item\interfaces\Modifier.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\util\JSONUtil.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\persistence\serialization\DoNotSerialize.java
+E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\entity\impl\npc\HelpfulNpc.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\event\listener\PlayerCreativeInteractEventListener.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\status\StatusEffect.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\item\impl\TitaniumIngotItem.java
@@ -126,9 +127,11 @@ E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\item\additional\requirements\ItemRequirement.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\entity\AbstractNpc.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\entity\impl\RatEntity.java
+E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\entity\pathfinding\MoveToLocationGoal.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\vfx\cinematic\CinematicFrame.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\navigation\Route.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\damage\DamageType.java
+E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\entity\AbstractSingularViewerNpc.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\event\PlayerStopSpectatingEntityEvent.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\inventory\impl\profile\ProfileInventory.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\event\party\PartyInviteUpdateEvent.java
@@ -147,6 +150,7 @@ E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\event\listener\mechanic\EntityCombustEventListener.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\dialogue\DialogueSection.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\util\unicode\UnicodeSpaceUtil.java
+E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\entity\pathfinding\EntityRoutePlanner.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\MinecraftEnhanced.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\item\ItemRarity.java
 E:\IntelliJ\MinecraftEnhanced\src\main\java\com\buoobuoo\minecraftenhanced\core\inventory\impl\playermenu\AbilityInventory.java

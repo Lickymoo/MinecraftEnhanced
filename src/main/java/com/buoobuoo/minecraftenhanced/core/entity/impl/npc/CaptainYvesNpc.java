@@ -30,9 +30,15 @@ public class CaptainYvesNpc extends AbstractNpc {
         DialogueManager dialogueManager = MinecraftEnhanced.getInstance().getDialogueManager();
         QuestManager questManager = MinecraftEnhanced.getInstance().getQuestManager();
 
+        if(questManager.playerHasCompletedQuest(player, questManager.getQuestByID("INTRO_1_QUEST")))
+            return;
+
         DialogueTrack track = new DialogueTrack();
         track.addSection(
-                new DialogueSection(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves", "Well " + player.getDisplayName() + ", it looks like the seas are rough!"),
+                new DialogueSection(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves", "Seas are rough. Going like this,", "it's going to take us 5 days", "to get to Onyrx"),
+                new DialogueSection(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves", "Food's running low too.", "Chances are, starvation'll take us", "before Onryx takes us in."),
+                new DialogueSection(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves", "Even if they do, refugees like us will", "only be allowed to live out in the ghettos.", "Still better than nothing"),
+                new DialogueSection(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves", "Wait... you hear that? The bow's starting to rock..."),
                 new ExecutableSection(inst -> {
                     Util.sendDialogueBox(player, CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves", "WOAH!?");
                     player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);

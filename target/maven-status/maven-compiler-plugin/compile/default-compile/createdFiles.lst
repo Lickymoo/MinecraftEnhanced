@@ -10,6 +10,7 @@ com\buoobuoo\minecraftenhanced\core\entity\AbstractNpc.class
 com\buoobuoo\minecraftenhanced\core\ability\AbilityType.class
 com\buoobuoo\minecraftenhanced\core\event\listener\mechanic\EntitySpawnEventListener.class
 com\buoobuoo\minecraftenhanced\core\util\JSONUtil.class
+com\buoobuoo\minecraftenhanced\rework\quest\QuestLine.class
 com\buoobuoo\minecraftenhanced\core\inventory\CustomInventoryManager.class
 com\buoobuoo\minecraftenhanced\core\ability\AbilityManager$1.class
 com\buoobuoo\minecraftenhanced\core\vfx\cinematic\SpectatorManager.class
@@ -27,6 +28,7 @@ com\buoobuoo\minecraftenhanced\core\player\PlayerManager$1.class
 com\buoobuoo\minecraftenhanced\core\ability\impl\FlagellantAbility.class
 com\buoobuoo\minecraftenhanced\core\item\interfaces\NotStackable.class
 com\buoobuoo\minecraftenhanced\core\event\listener\PlayerInteractNpcPacketListener$1.class
+com\buoobuoo\minecraftenhanced\core\navigation\RouteSingularPlayer.class
 com\buoobuoo\minecraftenhanced\core\util\unicode\UnicodeSpaceUtil.class
 com\buoobuoo\minecraftenhanced\core\item\impl\TitaniumIngotItem.class
 com\buoobuoo\minecraftenhanced\core\inventory\impl\profile\ProfileEditInventory.class
@@ -53,13 +55,13 @@ com\buoobuoo\minecraftenhanced\command\impl\PermissionCommand.class
 com\buoobuoo\minecraftenhanced\core\util\EnumUtil.class
 com\buoobuoo\minecraftenhanced\core\area\Area.class
 com\buoobuoo\minecraftenhanced\core\entity\interf\net\ServerGamePacketListener.class
+com\buoobuoo\minecraftenhanced\core\entity\pathfinding\MoveToLocationGoal.class
 com\buoobuoo\minecraftenhanced\core\block\BlockBreakInstance.class
 com\buoobuoo\minecraftenhanced\core\item\interfaces\type\MagicWeapon.class
 com\buoobuoo\minecraftenhanced\core\status\impl\FlagellantStatusEffect.class
 com\buoobuoo\minecraftenhanced\command\impl\EnhCommand$debug$mana.class
 com\buoobuoo\minecraftenhanced\core\item\additional\attributes\impl\defense\MaximumHealthItemAttribute.class
 com\buoobuoo\minecraftenhanced\core\chat\ChatManager$1.class
-com\buoobuoo\minecraftenhanced\command\impl\EnhCommand$debug$1.class
 com\buoobuoo\minecraftenhanced\persistence\serialization\DoNotSerialize.class
 com\buoobuoo\minecraftenhanced\core\item\additional\attributes\impl\defense\BubyItemAttribute.class
 com\buoobuoo\minecraftenhanced\core\util\Pair.class
@@ -86,6 +88,7 @@ com\buoobuoo\minecraftenhanced\core\item\interfaces\type\Armour.class
 com\buoobuoo\minecraftenhanced\core\ability\impl\DashAbility.class
 com\buoobuoo\minecraftenhanced\command\impl\EnhCommand$debug$level.class
 com\buoobuoo\minecraftenhanced\core\event\listener\ItemRequirementEventListener.class
+com\buoobuoo\minecraftenhanced\core\event\DialogueNextEvent.class
 com\buoobuoo\minecraftenhanced\core\inventory\impl\PartyInventory.class
 com\buoobuoo\minecraftenhanced\core\event\listener\mechanic\EntityDamageByEntityEventListener.class
 com\buoobuoo\minecraftenhanced\core\status\StatusEffect$1.class
@@ -97,6 +100,7 @@ com\buoobuoo\minecraftenhanced\core\event\DatabaseConnectEvent.class
 com\buoobuoo\minecraftenhanced\core\item\interfaces\BlockItem.class
 com\buoobuoo\minecraftenhanced\core\item\interfaces\Modifier.class
 com\buoobuoo\minecraftenhanced\core\player\PlayerManager.class
+com\buoobuoo\minecraftenhanced\core\entity\impl\npc\HelpfulNpc.class
 com\buoobuoo\minecraftenhanced\core\item\impl\TitaniumOreItem.class
 com\buoobuoo\minecraftenhanced\core\util\unicode\UnicodeSpaceUtil$PositiveChar.class
 com\buoobuoo\minecraftenhanced\core\event\party\PartyInviteUpdateEvent.class
@@ -141,6 +145,7 @@ com\buoobuoo\minecraftenhanced\core\vfx\cinematic\util\EntityHider$Policy.class
 com\buoobuoo\minecraftenhanced\command\impl\DialogueCommand.class
 com\buoobuoo\minecraftenhanced\core\event\PlayerStopSpectatingEntityEvent.class
 com\buoobuoo\minecraftenhanced\core\player\ProfileData.class
+com\buoobuoo\minecraftenhanced\core\entity\AbstractSingularViewerNpc.class
 com\buoobuoo\minecraftenhanced\core\util\Util.class
 com\buoobuoo\minecraftenhanced\core\block\CustomBlocks.class
 com\buoobuoo\minecraftenhanced\core\event\listener\mechanic\EntityRegainHealthEventListener.class
@@ -150,6 +155,7 @@ com\buoobuoo\minecraftenhanced\core\block\CustomBlock.class
 com\buoobuoo\minecraftenhanced\core\event\listener\mechanic\EntityCombustEventListener.class
 com\buoobuoo\minecraftenhanced\core\inventory\impl\EmptyPartyInventory.class
 com\buoobuoo\minecraftenhanced\core\item\AbilityGemItem.class
+com\buoobuoo\minecraftenhanced\rework\quest\impl\TestQuest.class
 com\buoobuoo\minecraftenhanced\core\vfx\particle\ParticleDirectory$1$1.class
 com\buoobuoo\minecraftenhanced\core\event\listener\PlayerCreativeInteractEventListener.class
 com\buoobuoo\minecraftenhanced\persistence\serialization\impl\GameModeSerializer.class
@@ -172,6 +178,7 @@ com\buoobuoo\minecraftenhanced\core\player\PlayerData.class
 com\buoobuoo\minecraftenhanced\command\impl\EnhCommand$debug$exp.class
 com\buoobuoo\minecraftenhanced\command\CommandManager.class
 com\buoobuoo\minecraftenhanced\core\item\impl\TestBowItem.class
+com\buoobuoo\minecraftenhanced\core\event\RouteFinishEvent.class
 com\buoobuoo\minecraftenhanced\core\item\CustomItems.class
 com\buoobuoo\minecraftenhanced\core\navigation\Route.class
 com\buoobuoo\minecraftenhanced\MinecraftEnhanced$1.class
@@ -194,6 +201,8 @@ com\buoobuoo\minecraftenhanced\persistence\serialization\impl\LocationSerializer
 com\buoobuoo\minecraftenhanced\core\inventory\impl\PlayerSearchInventory.class
 com\buoobuoo\minecraftenhanced\core\vfx\cinematic\util\EntityHider$2.class
 com\buoobuoo\minecraftenhanced\persistence\serialization\impl\ItemStackSerializer.class
+com\buoobuoo\minecraftenhanced\core\event\listener\mechanic\MoistureChangeEventListener.class
 com\buoobuoo\minecraftenhanced\core\player\tempmodifier\TemporaryDamageModifier.class
+com\buoobuoo\minecraftenhanced\core\entity\pathfinding\EntityRoutePlanner.class
 com\buoobuoo\minecraftenhanced\MinecraftEnhanced$2.class
 com\buoobuoo\minecraftenhanced\core\item\CustomItem.class

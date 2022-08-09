@@ -4,13 +4,16 @@ import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.RatEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.StoneGolemEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.npc.CaptainYvesNpc;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.npc.HelpfulNpc;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.pathfinding.EntityRoutePlanner;
 import com.buoobuoo.minecraftenhanced.core.event.PlayerInteractNpcEvent;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
 import com.buoobuoo.minecraftenhanced.core.util.Hologram;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import lombok.Getter;
+import net.minecraft.world.entity.PathfinderMob;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.ArmorStand;
@@ -26,28 +29,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Getter
 public class EntityManager implements Listener {
 
     private final MinecraftEnhanced plugin;
+    private final EntityRoutePlanner routePlanner;
+
     private final ArrayList<Class<? extends CustomEntity>> registeredEntityClasses = new ArrayList<>();
-    private final ArrayList<CustomEntity> registeredEntities = new ArrayList<>();
+    private final ConcurrentLinkedDeque<CustomEntity> registeredEntities = new ConcurrentLinkedDeque<>();
     private final Map<CustomEntity, List<Entity>> hologramList = new HashMap<>();
+    private final Map<PathfinderMob, Location> navigationMap = new HashMap<>();
 
     public EntityManager(MinecraftEnhanced plugin){
         this.plugin = plugin;
+        this.routePlanner = new EntityRoutePlanner(plugin, this);
+        plugin.registerEvents(routePlanner);
 
         setRegisteredEntityClasses(
                 CaptainYvesNpc.class,
+                HelpfulNpc.class,
 
                 RatEntity.class,
                 StoneGolemEntity.class
         );
     }
 
-    public void registerEntities(CustomEntity... entities){
-        registeredEntities.addAll(List.of(entities));
+    public void registerEntities(CustomEntity entity){
+        registeredEntities.add(entity);
     }
 
     public void setRegisteredEntityClasses(Class<? extends CustomEntity>... entities){
@@ -58,14 +68,47 @@ public class EntityManager implements Listener {
         try {
             CustomEntity entity = entClass.getConstructor(Location.class).newInstance(location);
             entity.spawnEntity(plugin, location);
-
-            registerEntities(entity);
             return entity;
         }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex){
             ex.printStackTrace();
         }
         return null;
     }
+
+
+    public CustomEntity spawnEntity(Class<? extends CustomEntity> entClass, Location location, Class<?>[] constructorClasses, Object... objects) {
+        try {
+            constructorClasses = Util.addToBeginningOfArray(constructorClasses, Location.class);
+            Object[] constructorObjects = Util.addToBeginningOfArray(objects, location);
+
+            CustomEntity entity = entClass.getConstructor(constructorClasses).newInstance(constructorObjects);
+            getRegisteredEntities().forEach(e -> System.out.println(e));
+            entity.spawnEntity(plugin, location);
+            return entity;
+        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex){
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    public CustomEntity spawnEntity(Class<? extends CustomEntity> entClass, Location location, Object... objects) {
+        try {
+            Class<?>[] constructorClasses = new Class<?>[objects.length+1];
+            constructorClasses[0] = Location.class;
+            for(int i = 0; i < objects.length; i++){
+                constructorClasses[i+1] = objects[i].getClass();
+            }
+            Object[] constructorObjects = Util.addToBeginningOfArray(objects, location);
+
+            CustomEntity entity = entClass.getConstructor(constructorClasses).newInstance(constructorObjects);
+            entity.spawnEntity(plugin, location);
+            return entity;
+        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex){
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
 
     /*
     Util
@@ -121,6 +164,22 @@ public class EntityManager implements Listener {
         return pdc.get(new NamespacedKey(plugin, "HEALTH"), PersistentDataType.DOUBLE);
     }
 
+    public void removeEntity(CustomEntity entity){
+        entity.onDestroy();
+
+        for(org.bukkit.entity.Entity hologram : hologramList.get(entity)){
+            hologram.remove();
+        }
+        entity.asEntity().remove(net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+        registeredEntities.remove(entity);
+        hologramList.remove(entity);
+    }
+
+    public void destroyAll(){
+        for(CustomEntity entity : registeredEntities){
+           removeEntity(entity);
+        }
+    }
     /*
     Listeners
      */

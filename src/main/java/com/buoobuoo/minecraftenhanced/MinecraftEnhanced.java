@@ -84,6 +84,7 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
 
     @Override
     public void onDisable(){
+        entityManager.destroyAll();
         playerManager.saveAll();
         mongoHook.disable();
     }
@@ -91,6 +92,7 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
     public void initManagers(){
         mongoHook = new MongoHook(this);
 
+        routeManager = new RouteManager(this);
         protocolManager = ProtocolLibrary.getProtocolManager();
         customBlockManager = new CustomBlockManager(this);
         customItemManager = new CustomItemManager(this);
@@ -107,7 +109,6 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
         abilityManager = new AbilityManager(this);
         chatManager = new ChatManager(this);
         areaManager = new AreaManager(this);
-        routeManager = new RouteManager(this);
 
         commandManager = new CommandManager(this);
 
@@ -137,7 +138,8 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
                 new PlayerManagerItemListener(this),
                 new PlayerCreativeInteractEventListener(this),
                 new BlockGrowEventListener(this),
-                new NpcTeamTagListener(this)
+                new NpcTeamTagListener(this),
+                new MoistureChangeEventListener(this)
         );
 
         //packet listener

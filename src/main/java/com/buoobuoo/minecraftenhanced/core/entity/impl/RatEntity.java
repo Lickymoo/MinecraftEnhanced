@@ -3,7 +3,6 @@ package com.buoobuoo.minecraftenhanced.core.entity.impl;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.ModelEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Silverfish;
-import net.minecraft.world.level.Level;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 

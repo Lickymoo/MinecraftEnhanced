@@ -21,7 +21,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -195,11 +194,20 @@ public class Util {
         }
     }
 
-    public static String[] addToArr(String[] arr, String... str){
-        List<String> list = new ArrayList<>();
+    public static <T> T[] addToArr(T[] arr, T... str){
+        List<T> list = new ArrayList<>();
         list.addAll(Arrays.asList(arr));
         list.addAll(Arrays.asList(str));
-        return list.toArray(new String[0]);
+        return list.toArray((T[]) new Object[0]);
+    }
+
+    public static <T> T[] addToBeginningOfArray(T[] elements, T element)
+    {
+        T[] newArray = Arrays.copyOf(elements, elements.length + 1);
+        newArray[0] = element;
+        System.arraycopy(elements, 0, newArray, 1, elements.length);
+
+        return newArray;
     }
 
     public static String fromList(List<String> strList){
