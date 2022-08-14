@@ -3,6 +3,10 @@ package com.buoobuoo.minecraftenhanced.core.util;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.ToolType;
 import com.buoobuoo.minecraftenhanced.core.block.CustomBlock;
+import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
+import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.AttributedItem;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.type.Weapon;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.UnicodeSpaceUtil;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -11,15 +15,20 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.BlockIterator;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -171,34 +180,55 @@ public class Util {
         return ret;
     }
 
-    public static void sendDialogueBox(Player player, CharRepo icon, String... strs){
-        strs = padEmpty(strs, 6);
-        player.sendMessage(Util.formatColour(CharRepo.UI_DIALOGUE_BORDER + UnicodeSpaceUtil.getNeg(47) + icon  + UnicodeSpaceUtil.getPos(1) + " " + strs[0]));
-        for(int i = 1; i < strs.length; i++){
-            player.sendMessage(Util.formatColour("             " + strs[i]));
-        }
+    public static void sendDialogueBox(Player player, CharRepo icon, String str){
+        sendDialogueBox(player, icon, str, null);
     }
 
-    public static void sendDialogueBox(Player player, CharRepo icon, TextComponent... strs){
-        TextComponent iconCom = new TextComponent(CharRepo.UI_DIALOGUE_BORDER + UnicodeSpaceUtil.getNeg(47) + icon  + UnicodeSpaceUtil.getPos(1) + " ");
-        TextComponent txt = new TextComponent(strs[0]);
-        player.spigot().sendMessage(iconCom, txt);
+    public static void sendDialogueBox(Player player, CharRepo icon, String str, TextComponent nextButton){
+        int charsPerLine = 54;
 
-        for(int i = 1; i < strs.length; i++) {
-            if (strs[i] != null) {
-                TextComponent pad = new TextComponent("             ");
-                player.spigot().sendMessage(pad, strs[i]);
-            }else{
-                player.sendMessage("");
+        String spacing = "            ";
+        String[] words = str.split(" ");
+        List<String> lines = new ArrayList<>();
+
+        //ignore spacing on first line
+        String line = "";
+        for(String word : words){
+            if((line + " " + word).length() <= charsPerLine && !word.contains("\n")){
+                line = line + " " + word;
+            }else {
+                lines.add(line.replace("\n", ""));
+
+                line = spacing;
+                line = line + " " + word;
             }
         }
+        lines.add(line.replace("\n", ""));
+
+        for(int i = 0; i < (nextButton == null ? 6 : 5); i++){
+            if(lines.size()-1 < i)
+                lines.add(" ");
+        }
+
+        for(int i = 0; i < lines.size(); i++) {
+            String out = lines.get(i);
+            if (i == 0) {
+                out = out.trim();
+                player.sendMessage(Util.formatColour(CharRepo.UI_DIALOGUE_BORDER + UnicodeSpaceUtil.getNeg(47) + icon  + UnicodeSpaceUtil.getPos(1) + " " + out));
+            } else {
+                player.sendMessage(Util.formatColour(out));
+            }
+        }
+
+        if(nextButton != null)
+            player.spigot().sendMessage(nextButton);
     }
 
     public static <T> T[] addToArr(T[] arr, T... str){
         List<T> list = new ArrayList<>();
         list.addAll(Arrays.asList(arr));
         list.addAll(Arrays.asList(str));
-        return list.toArray((T[]) new Object[0]);
+        return list.toArray(arr);
     }
 
     public static <T> T[] addToBeginningOfArray(T[] elements, T element)
@@ -359,6 +389,77 @@ public class Util {
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
         return generatedString;
+    }
+
+    public static List<Pair<ItemStack, AttributedItem>> getEquippedAttributedItems(MinecraftEnhanced plugin, Player player){
+        CustomItemManager customItemManager = plugin.getCustomItemManager();
+        List<ItemStack> items = new ArrayList<>();
+        List<Pair<ItemStack, AttributedItem>> attributedItems = new ArrayList<>();
+
+        ItemStack hand = player.getInventory().getItemInMainHand();
+        CustomItem handHandler = customItemManager.getRegistry().getHandler(hand);
+        if(!(handHandler instanceof Weapon))
+            hand = null;
+
+        ItemStack helm = player.getInventory().getHelmet();
+        ItemStack chest = player.getInventory().getChestplate();
+        ItemStack legs = player.getInventory().getLeggings();
+        ItemStack boots = player.getInventory().getBoots();
+
+        items.add(hand);
+        items.add(helm);
+        items.add(chest);
+        items.add(legs);
+        items.add(boots);
+
+        for(ItemStack item : items){
+            if(item == null)
+                continue;
+
+            CustomItem handler = customItemManager.getRegistry().getHandler(item);
+            if(!(handler instanceof AttributedItem))
+                continue;
+            attributedItems.add(Pair.of(item, (AttributedItem) handler));
+        }
+
+        return attributedItems;
+    }
+
+    public static Entity getTarget(Player player, float range) {
+        List<Entity> nearbyE = player.getNearbyEntities(range,
+                range,range);
+        ArrayList<LivingEntity> livingE = new ArrayList<>();
+
+        for (Entity e : nearbyE) {
+            if (e instanceof LivingEntity) {
+                livingE.add((LivingEntity) e);
+            }
+        }
+
+        BlockIterator bItr = new BlockIterator(player, (int)range);
+        Block block;
+        Location loc;
+        int bx, by, bz;
+        double ex, ey, ez;
+        // loop through player's line of sight
+        while (bItr.hasNext()) {
+            block = bItr.next();
+            bx = block.getX();
+            by = block.getY();
+            bz = block.getZ();
+            // check for entities near this block in the line of sight
+            for (LivingEntity e : livingE) {
+                loc = e.getLocation();
+                ex = loc.getX();
+                ey = loc.getY();
+                ez = loc.getZ();
+                if ((bx-.75 <= ex && ex <= bx+1.75) && (bz-.75 <= ez && ez <= bz+1.75) && (by-1 <= ey && ey <= by+2.5)) {
+                    // entity is close enough, set target and stop
+                    return (Entity) e;
+                }
+            }
+        }
+        return null;
     }
 }
 

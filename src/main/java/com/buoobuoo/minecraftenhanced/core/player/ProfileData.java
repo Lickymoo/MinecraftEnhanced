@@ -3,7 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.player;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.ability.AbilityCastType;
 import com.buoobuoo.minecraftenhanced.core.area.Area;
-import com.buoobuoo.minecraftenhanced.core.player.tempmodifier.TemporaryDamageModifier;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityStatInstance;
 import com.buoobuoo.minecraftenhanced.core.player.tempmodifier.TemporaryStatModifier;
 import com.buoobuoo.minecraftenhanced.core.status.StatusEffect;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
@@ -30,8 +30,8 @@ public class ProfileData {
     public static final double BASE_HEALTH = 20;
     public static final double BASE_MANA = 20;
 
-    public static final double BASE_MANA_REGEN_PER_SECOND = 1;
-    public static final double BASE_HEALTH_REGEN_PER_SECOND = 1;
+    public static final double BASE_MANA_REGEN_PER_SECOND = .5;
+    public static final double BASE_HEALTH_REGEN_PER_SECOND = .5;
 
     public static final double BASE_WALK_SPEED = 0.2f;
 
@@ -60,6 +60,8 @@ public class ProfileData {
     private String[] abilityIDs = new String[4];
     private AbilityCastType[] abilityCastTypes = new AbilityCastType[4];
 
+    private String lastAreaName;
+
     @DoNotSerialize
     private HashMap<String, Integer> cooldowns;
 
@@ -67,19 +69,17 @@ public class ProfileData {
     private double health;
     private double mana;
 
-
     @DoNotSerialize
-    private ProfileStatInstance statInstance;
+    private EntityStatInstance statInstance;
 
     @DoNotSerialize
     private List<StatusEffect> statusEffects = new ArrayList<>();
 
-    //used for next attack modifier
-    @DoNotSerialize
-    private ConcurrentLinkedQueue<TemporaryDamageModifier> temporaryDamageModifiers = new ConcurrentLinkedQueue<>();
-
     @DoNotSerialize
     private ConcurrentLinkedQueue<TemporaryStatModifier> temporaryStatModifiers = new ConcurrentLinkedQueue<>();
+
+    @DoNotSerialize
+    private ConcurrentLinkedQueue<TemporaryStatModifier> onHitStatModifier = new ConcurrentLinkedQueue<>();
 
     @DoNotSerialize
     private Area currentArea;
@@ -143,6 +143,8 @@ public class ProfileData {
         player.getInventory().setItem(8, playerManagerItem);
 
         player.updateInventory();
+
+        MinecraftEnhanced.getInstance().getQuestManager().loadQuests(this);
     }
 
     public void init(Player player){

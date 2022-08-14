@@ -2,7 +2,6 @@ package com.buoobuoo.minecraftenhanced.core.entity.pathfinding;
 
 import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.pathfinder.Path;

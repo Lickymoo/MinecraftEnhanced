@@ -7,8 +7,8 @@ import org.bukkit.util.Vector;
 
 @Getter
 public class Area {
-    private final String name;
-    private final BoundingBox[] boundingBoxes;
+    protected final String name;
+    protected final BoundingBox[] boundingBoxes;
 
     public Area(String name, BoundingBox... boundingBoxes){
         this.name = name;

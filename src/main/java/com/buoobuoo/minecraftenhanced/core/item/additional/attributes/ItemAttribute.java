@@ -1,7 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.item.additional.attributes;
 
-import com.buoobuoo.minecraftenhanced.core.damage.DamageInstance;
-import com.buoobuoo.minecraftenhanced.core.player.ProfileStatInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityStatInstance;
 import com.buoobuoo.minecraftenhanced.core.util.Pair;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
@@ -32,7 +31,5 @@ public abstract class ItemAttribute implements Listener {
         return  val;
     }
 
-    public abstract void onDamage(DamageInstance damageInstance, ItemAttributeInstance instance);
-
-    public abstract void onCalc(ProfileStatInstance statInstance, ItemAttributeInstance instance);
+    public abstract void onCalc(EntityStatInstance statInstance, ItemAttributeInstance instance);
 }

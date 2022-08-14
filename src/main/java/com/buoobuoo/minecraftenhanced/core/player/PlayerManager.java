@@ -1,14 +1,16 @@
 package com.buoobuoo.minecraftenhanced.core.player;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityStatInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.util.TagEntity;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateSecondEvent;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.impl.profile.ProfileInventory;
 import com.buoobuoo.minecraftenhanced.core.player.tempmodifier.TemporaryStatModifier;
-import com.buoobuoo.minecraftenhanced.core.quest.Quest;
 import com.buoobuoo.minecraftenhanced.core.quest.QuestManager;
+import com.buoobuoo.minecraftenhanced.core.quest.impl.act1.ACT1_MQ1;
 import com.buoobuoo.minecraftenhanced.core.status.StatusEffect;
-import com.buoobuoo.minecraftenhanced.core.util.Hologram;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.UnicodeSpaceUtil;
@@ -19,7 +21,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -112,6 +114,10 @@ public class PlayerManager implements Listener {
     public void onLeave(PlayerQuitEvent event){
         //save data
         PlayerData playerData = getPlayer(event.getPlayer());
+        EntityManager entityManager = plugin.getEntityManager();
+        if(playerData.getActiveProfileID() != null)
+            entityManager.cleanUp(getProfile(playerData.getActiveProfileID()));
+
         playerData.save(plugin);
 
         //remove all old profiles
@@ -158,7 +164,7 @@ public class PlayerManager implements Listener {
                     continue;
 
                 ProfileData profileData = getProfile(data.getActiveProfileID());
-                ProfileStatInstance instance = new ProfileStatInstance(plugin, profileData);
+                EntityStatInstance instance = new EntityStatInstance(plugin, profileData);
                 for(TemporaryStatModifier statModifier : profileData.getTemporaryStatModifiers()){
                     statModifier.getInstanceConsumer().accept(instance);
                     profileData.getTemporaryStatModifiers().remove(statModifier);
@@ -195,7 +201,7 @@ public class PlayerManager implements Listener {
             setDisplayPrefix(data);
             ProfileData profileData = getProfile(data.getActiveProfileID());
             if(profileData.getStatInstance() == null)
-                profileData.setStatInstance(new ProfileStatInstance(plugin, profileData));
+                profileData.setStatInstance(new EntityStatInstance(plugin, profileData));
 
 
             //Status effect bar
@@ -238,18 +244,20 @@ public class PlayerManager implements Listener {
             profileData.setLevel(level+1);
             profileData.setExperience(currentExp-requiredExp);
 
-            List<Entity> entityList = Hologram.spawnHologram(plugin, player.getLocation().clone().add(0, 1.5, 0), false, 40, CharRepo.TAG_LEVEL_UP.getCh());
+            EntityManager entityManager = plugin.getEntityManager();
+            List<TagEntity> entityList = entityManager.spawnHologram(player.getLocation().clone().add(0, 1.5, 0), 40, CharRepo.TAG_LEVEL_UP.getCh());
 
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    for(Entity ent : entityList){
-                        if(ent == null || ent.isDead())
+                    for(TagEntity ent : entityList){
+                        if(ent == null)
                             this.cancel();
 
-                        Location loc = ent.getLocation();
+                        ArmorStand as = (ArmorStand) ent.asEntity().getBukkitEntity();
+                        Location loc = as.getLocation();
                         loc.add(0, .05, 0);
-                        ent.teleport(loc);
+                        as.teleport(loc);
                     }
                 }
 
@@ -384,18 +392,15 @@ public class PlayerManager implements Listener {
         Player player = Bukkit.getPlayer(profileData.getOwnerID());
 
         QuestManager questManager = plugin.getQuestManager();
-        Quest introQuest = questManager.getQuestByID("INTRO_1_QUEST");
-        if(!questManager.playerHasStartedQuest(player, introQuest) && !questManager.playerHasCompletedQuest(player, introQuest)){
+        if(!questManager.hasActiveQuest(ACT1_MQ1.class, profileData) && !questManager.hasCompletedQuest(ACT1_MQ1.class, profileData)){
             beginStory(profileData);
         }
     }
 
     public void beginStory(ProfileData profileData){
-        Player player = Bukkit.getPlayer(profileData.getOwnerID());
 
         QuestManager questManager = plugin.getQuestManager();
-        Quest intro1Quest = questManager.getQuestByID("INTRO_1_QUEST");
-        questManager.beginQuest(player, intro1Quest, true);
+        questManager.startQuest(ACT1_MQ1.class, profileData);
 
 
     }

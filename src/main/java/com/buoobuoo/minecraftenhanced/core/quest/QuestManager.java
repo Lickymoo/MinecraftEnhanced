@@ -2,156 +2,197 @@ package com.buoobuoo.minecraftenhanced.core.quest;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
-import com.buoobuoo.minecraftenhanced.core.quest.impl.story.intro.Intro1Quest;
-import com.buoobuoo.minecraftenhanced.core.quest.impl.story.intro.Intro2Quest;
-import com.buoobuoo.minecraftenhanced.core.util.Pair;
-import com.buoobuoo.minecraftenhanced.core.util.Util;
-import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
+import com.buoobuoo.minecraftenhanced.core.quest.impl.act1.ACT1_MQ1;
+import com.buoobuoo.minecraftenhanced.core.quest.impl.act1.ACT1_MQ2;
+import com.buoobuoo.minecraftenhanced.core.quest.impl.act1.ACT1_MQ3;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class QuestManager {
-    private final MinecraftEnhanced plugin;
+    private List<QuestLine> registeredQuests = new ArrayList<>();
 
-    private final List<Quest> questList = new ArrayList<>();
+    private final MinecraftEnhanced plugin;
 
     public QuestManager(MinecraftEnhanced plugin){
         this.plugin = plugin;
     }
 
     public void init(){
-        //Quests
         registerQuests(
-                new Intro1Quest(plugin),
-                new Intro2Quest(plugin)
+                new ACT1_MQ1(plugin),
+                new ACT1_MQ2(plugin),
+                new ACT1_MQ3(plugin)
         );
     }
 
-
-    public boolean beginQuest(Player player, Quest quest){
-        return beginQuest(player, quest, false);
+    public void registerQuests(QuestLine... quests){
+        registeredQuests.addAll(List.of(quests));
+        plugin.registerEvents(quests);
     }
 
-    public boolean beginQuest(Player player, Quest quest, boolean silent){
-        if(quest == null)
-            return false;
-
-        String questID = quest.getQuestID();
-        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
-        if(playerHasCompletedQuest(player, quest) || playerHasStartedQuest(player, quest))
-            return false;
-
-        if(!silent) {
-            Util.sendDialogueBox(player, CharRepo.UI_PORTRAIT_BOUNCER_TUFF, "&7&lQuest started - &f&l" + quest.getQuestName(), quest.getQuestBrief());
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.MASTER, 1, 1);
-        }
-
-        quest.onStart(player);
-        profileData.getActiveQuests().add(activeQuestToString(questID, 0));
-        return true;
-    }
-
-    public void completeQuest(Player player, Quest quest){
-        if(quest == null)
-            return;
-
-        String questID = quest.getQuestID();
-        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
-        profileData.getActiveQuests().remove(getActiveQuestString(player, questID));
-        profileData.getCompletedQuest().add(questID);
-        quest.onComplete(player);
-    }
-
-    public void resetQuest(Player player, Quest quest){
-        if(quest == null)
-            return;
-
-        String questID = quest.getQuestID();
-        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
-        profileData.getActiveQuests().remove(getActiveQuestString(player, questID));
-        profileData.getCompletedQuest().remove(questID);
-    }
-
-    public Quest getQuestByID(String questID){
-        questID = questID.toUpperCase();
-        for(Quest quest : questList){
-            if(quest.getQuestID().equalsIgnoreCase(questID))
-                return quest;
+    public QuestLine getQuestByClass(Class<? extends QuestLine> clazz){
+        for(QuestLine questLine : registeredQuests){
+            if(questLine.getClass() == clazz)
+                return questLine;
         }
         return null;
     }
 
-    public void registerQuests(Quest... quests) {
-        for (Quest quest : quests) {
-            questList.add(quest);
-            plugin.registerEvents(quest);
+    public QuestLine getQuestByID(String id){
+        for(QuestLine questLine : registeredQuests){
+            if(questLine.getQuestID().equalsIgnoreCase(id))
+                return questLine;
         }
+        return null;
     }
-    public boolean playerHasCompletedQuest(Player player, Quest quest){
-        if(quest == null)
-            return false;
 
-        String questID = quest.getQuestID();
-        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
-        for(String str : profileData.getCompletedQuest()){
-            if(str.equalsIgnoreCase(questID))
-                return true;
+    public Class<? extends QuestLine> getQuestClassByID(String id){
+        for(QuestLine questLine : registeredQuests){
+            if(questLine.getQuestID().equalsIgnoreCase(id))
+                return questLine.getClass();
         }
-        return false;
-    }
-
-    public boolean playerHasStartedQuest(Player player, Quest quest){
-        if(quest == null)
-            return false;
-        String questID = quest.getQuestID();
-        Pair<String, Integer> progress = parseActiveQuest(player, questID);
-
-        return progress != null;
-    }
-
-    public int getProgress(Player player, Quest quest){
-        if(quest == null)
-            return -1;
-
-        String questID = quest.getQuestID();
-        Pair<String, Integer> progress = parseActiveQuest(player, questID);
-        return progress == null ? -1 : progress.getRight();
+        return null;
     }
 
     public List<String> allQuestID(){
         List<String> quests = new ArrayList<>();
-        for(Quest quest : questList){
+        for(QuestLine quest : registeredQuests){
             quests.add(quest.getQuestID());
         }
         return quests;
     }
 
-    public Pair<String, Integer> parseActiveQuest(Player player, String questID){
-        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
-        for(String s : profileData.getActiveQuests()){
-            if(s.contains(questID)){
-                String[] str = s.split(":");
-                return Pair.of(str[0], Integer.parseInt(str[1]));
-            }
-        }
-        return null;
+    public void startQuest(String questID, ProfileData profileData){
+        startQuest(getQuestClassByID(questID), profileData);
     }
 
-    public String getActiveQuestString(Player player, String questID){
-        ProfileData profileData = plugin.getPlayerManager().getProfile(player);
+    public void startQuest(Class<? extends QuestLine> questClass, ProfileData profileData){
+        QuestLine questLine = getQuestByClass(questClass);
+        Player player = Bukkit.getPlayer(profileData.getOwnerID());
+        questLine.start(player);
+    }
+
+    public void finishQuest(String questID, ProfileData profileData){
+        finishQuest(getQuestClassByID(questID), profileData);
+    }
+
+    public void finishQuest(Class<? extends QuestLine> questClass, ProfileData profileData){
+        applyCompletedToProfile(questClass, profileData);
+    }
+
+    public void resetQuest(String questID, ProfileData profileData){
+        resetQuest(getQuestClassByID(questID), profileData);
+    }
+
+    public void resetQuest(Class<? extends QuestLine> questClass, ProfileData profileData){
+        QuestLine questLine = getQuestByClass(questClass);
+        removeActiveQuest(questClass, profileData);
+        profileData.getCompletedQuest().remove(questLine.getQuestID());
+    }
+
+    public void loadQuests(ProfileData profileData){
         for(String str : profileData.getActiveQuests()){
-            if(str.contains(questID)) {
-                return str;
-            }
+            String questID = str.split(":")[0];
+            QuestLine questLine = getQuestByID(questID);
+            Player player = Bukkit.getPlayer(profileData.getOwnerID());
+
+            questLine.loadQuestString(player, str);
         }
-        return null;
     }
 
-    public String activeQuestToString(String questID, int val){
-        return questID + ":" + val;
+    public void applyActiveToProfile(Class<? extends QuestLine> questClass, ProfileData profileData){
+        QuestLine questLine = getQuestByClass(questClass);
+        Player player = Bukkit.getPlayer(profileData.getOwnerID());
+
+        removeActiveQuest(questClass, profileData);
+        String str = questLine.saveQuestString(player);
+        profileData.getActiveQuests().add(str);
+    }
+
+    public void applyCompletedToProfile(Class<? extends QuestLine> questClass, ProfileData profileData){
+        QuestLine questLine = getQuestByClass(questClass);
+        Player player = Bukkit.getPlayer(profileData.getOwnerID());
+
+        removeActiveQuest(questClass, profileData);
+        profileData.getCompletedQuest().add(questLine.getQuestID());
+    }
+
+    public void removeActiveQuest(Class<? extends QuestLine> questClass, ProfileData profileData){
+        QuestLine questLine = getQuestByClass(questClass);
+        String flag = null;
+        for(String str : profileData.getActiveQuests()){
+            String questID = str.split(":")[0];
+            if(questLine.getQuestID().equalsIgnoreCase(questID))
+                flag = str;
+        }
+        if(flag != null)
+            profileData.getActiveQuests().remove(flag);
+    }
+
+    public boolean hasActiveQuest(Class<? extends QuestLine> questClass, ProfileData profileData){
+        QuestLine questLine = getQuestByClass(questClass);
+        for(String str : profileData.getActiveQuests()){
+            String questID = str.split(":")[0];
+            if(questLine.getQuestID().equalsIgnoreCase(questID))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean hasCompletedQuest(Class<? extends QuestLine> questClass, ProfileData profileData){
+        QuestLine questLine = getQuestByClass(questClass);
+        for(String str : profileData.getCompletedQuest()){
+            if(questLine.getQuestID().equalsIgnoreCase(str))
+                return true;
+        }
+        return false;
+    }
+
+    public void clearPlayer(Player player){
+        for(QuestLine questLine : registeredQuests){
+            questLine.clearPlayer(player);
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -2,13 +2,14 @@ package com.buoobuoo.minecraftenhanced.core.entity.impl;
 
 import com.buoobuoo.minecraftenhanced.core.entity.interf.ModelEntity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.Silverfish;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 
-public class RatEntity extends Silverfish implements ModelEntity {
+public class RatEntity extends Wolf implements ModelEntity {
     public RatEntity(Location loc) {
-        super(EntityType.SILVERFISH, ((CraftWorld) loc.getWorld()).getHandle());
+        super(EntityType.WOLF, ((CraftWorld) loc.getWorld()).getHandle());
     }
 
     @Override
@@ -28,7 +29,7 @@ public class RatEntity extends Silverfish implements ModelEntity {
 
     @Override
     public double damage() {
-        return 0;
+        return 1;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class RatEntity extends Silverfish implements ModelEntity {
 
     @Override
     public int entityLevel() {
-        return 0;
+        return 1;
     }
 
     @Override
@@ -56,4 +57,5 @@ public class RatEntity extends Silverfish implements ModelEntity {
         return "rat";
     }
 }
+
 

@@ -1,10 +1,13 @@
 package com.buoobuoo.minecraftenhanced.core.area;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.area.impl.AramoreArea;
+import com.buoobuoo.minecraftenhanced.core.area.impl.aramore.AramoreArea;
+import com.buoobuoo.minecraftenhanced.core.area.impl.aramore.AramoreWolfArea;
 import com.buoobuoo.minecraftenhanced.core.event.AreaEnterEvent;
 import com.buoobuoo.minecraftenhanced.core.event.AreaExitEvent;
+import com.buoobuoo.minecraftenhanced.core.event.update.UpdateSecondEvent;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
+import com.buoobuoo.minecraftenhanced.core.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -24,7 +27,9 @@ public class AreaManager implements Listener {
         this.plugin = plugin;
 
         registerAreas(
-            new AramoreArea()
+                //aramore area
+                new AramoreArea(),
+                new AramoreWolfArea()
 
         );
     }
@@ -34,8 +39,19 @@ public class AreaManager implements Listener {
     }
 
     public Area getArea(Location loc){
+        //TODO
+        Area selectedArea = null;
         for(Area area : areaList){
-            if(area.contains(loc))
+            if(area.contains(loc)){
+                selectedArea = area;
+            }
+        }
+        return selectedArea;
+    }
+
+    public Area getAreaByName(String name){
+        for(Area area : areaList){
+            if(area.getName().equalsIgnoreCase(name))
                 return area;
         }
         return null;
@@ -61,11 +77,24 @@ public class AreaManager implements Listener {
             enterArea(profileData, area);
     }
 
+    @EventHandler
+    public void updateSecond(UpdateSecondEvent event){
+        for(Area area : areaList){
+            if(!(area instanceof MobSpawningArea mobSpawningArea))
+                continue;
+
+            mobSpawningArea.updateSecond(plugin);
+        }
+    }
+
     public void enterArea(ProfileData profileData, Area area){
         Player player = Bukkit.getPlayer(profileData.getOwnerID());
 
         profileData.setCurrentArea(area);
-        player.sendMessage("Entering " + area.getName());
+        if(area instanceof TownArea) {
+            player.sendTitle("", Util.formatColour("&7&lEntering " + area.getName()));
+            profileData.setLastAreaName(area.getName());
+        }
 
         AreaEnterEvent event = new AreaEnterEvent(player, area);
         Bukkit.getPluginManager().callEvent(event);
@@ -76,7 +105,9 @@ public class AreaManager implements Listener {
         Player player = Bukkit.getPlayer(profileData.getOwnerID());
 
         profileData.setCurrentArea(null);
-        player.sendMessage("Exiting " + area.getName());
+        if(area instanceof TownArea) {
+            player.sendTitle("", Util.formatColour("&7&lExiting " + area.getName()));
+        }
 
         AreaExitEvent event = new AreaExitEvent(player, area);
         Bukkit.getPluginManager().callEvent(event);

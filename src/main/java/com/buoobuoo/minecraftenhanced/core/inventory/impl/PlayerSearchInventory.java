@@ -3,6 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.inventory.impl;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.AnvilRenameEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
@@ -76,7 +77,7 @@ public class PlayerSearchInventory extends CustomInventory {
         Inventory inv = Bukkit.createInventory(this, InventoryType.ANVIL, Util.formatColour(title));
         inv.setItem(0, item);
 
-        ItemStack invis = new ItemBuilder(Material.PAPER).name(" ").setCustomModelData(1000).create();
+        ItemStack invis = new ItemBuilder(MatRepo.INVISIBLE).name(" ").create();
         inv.setItem(1,invis);
 
         return inv;
@@ -106,7 +107,7 @@ public class PlayerSearchInventory extends CustomInventory {
                     .name(name).create();
             inv.setItem(0, head);
 
-            ItemStack accept = new ItemBuilder(Material.PAPER).name(Util.formatColour("&a&lSelect Player")).setCustomModelData(1001).create();
+            ItemStack accept = new ItemBuilder(MatRepo.GREEN_TICK).name(Util.formatColour("&a&lSelect Player")).create();
             ItemMeta meta = accept.getItemMeta();
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
             pdc.set(new NamespacedKey(plugin, "PLAYER_SEL"), PersistentDataType.STRING, player.getUniqueId().toString());

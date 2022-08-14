@@ -4,15 +4,13 @@ import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.PlayerInteractNpcEvent;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.mojang.authlib.properties.Property;
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -34,19 +32,24 @@ public interface NpcEntity extends CustomEntity {
         pdc.set(new NamespacedKey(plugin, "DAMAGE"), PersistentDataType.DOUBLE, damage());
 
         onSpawn();
-        plugin.getEntityManager().registerEntities(this);
-    }
 
-    default void show(Player player){
-        Util.sendPacket(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, (ServerPlayer) asEntity()), player);
-        Util.sendPacket(new ClientboundAddPlayerPacket((ServerPlayer)asEntity()), player);
-        Util.sendPacket(new ClientboundSetEntityDataPacket(asEntity().getBukkitEntity().getEntityId(), asEntity().getEntityData(), true), player);
+        plugin.getEntityManager().registerEntities(this);
     }
 
     default void onInteract(PlayerInteractNpcEvent event){
 
     }
+
+    @Override
+    default void destroyEntity(){
+        isDestroyed.put(this, true);
+        getChildren().forEach(CustomEntity::destroyEntity);
+        Util.sendPacketGlobal(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, (ServerPlayer) asEntity()));
+        Util.sendPacketGlobal(new ClientboundRemoveEntitiesPacket(asEntity().getBukkitEntity().getEntityId()));
+    }
 }
+
+
 
 
 

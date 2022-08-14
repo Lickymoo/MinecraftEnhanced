@@ -19,11 +19,6 @@ public class DialogueCommand extends BaseCommand {
     }
 
     @Default
-    public void def(Player player){
-        plugin.getDialogueManager().incrementDialogue(player);
-    }
-
-    @Default
     public void def(Player player, String id){
         DialogueNextEvent event = new DialogueNextEvent(player, id);
         Bukkit.getPluginManager().callEvent(event);

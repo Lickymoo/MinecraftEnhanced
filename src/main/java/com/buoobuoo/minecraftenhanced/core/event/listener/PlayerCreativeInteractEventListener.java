@@ -22,9 +22,6 @@ public class PlayerCreativeInteractEventListener implements Listener {
     public void listen(BlockBreakEvent event){
         Player player = event.getPlayer();
 
-        if(player.getGameMode() != GameMode.CREATIVE)
-            return;
-
         ItemStack item = player.getInventory().getItemInMainHand();
         CustomItem handler = plugin.getCustomItemManager().getRegistry().getHandler(item);
 

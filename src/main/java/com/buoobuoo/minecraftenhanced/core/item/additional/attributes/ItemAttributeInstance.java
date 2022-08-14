@@ -1,7 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.item.additional.attributes;
 
-import com.buoobuoo.minecraftenhanced.core.damage.DamageInstance;
-import com.buoobuoo.minecraftenhanced.core.player.ProfileStatInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityStatInstance;
 import lombok.Getter;
 
 import java.text.DecimalFormat;
@@ -29,11 +28,7 @@ public class ItemAttributeInstance {
         return new DecimalFormat("#").format(value);
     }
 
-    public void onDamage(DamageInstance damageInstance){
-        attribute.onDamage(damageInstance, this);
-    }
-
-    public void onCalc(ProfileStatInstance instance){
+    public void onCalc(EntityStatInstance instance){
         attribute.onCalc(instance, this);
     }
 }

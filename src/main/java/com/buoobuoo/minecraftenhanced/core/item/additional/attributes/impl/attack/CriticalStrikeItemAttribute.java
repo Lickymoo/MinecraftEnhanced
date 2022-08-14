@@ -1,9 +1,8 @@
 package com.buoobuoo.minecraftenhanced.core.item.additional.attributes.impl.attack;
 
-import com.buoobuoo.minecraftenhanced.core.damage.DamageInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityStatInstance;
 import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.ItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.ItemAttributeInstance;
-import com.buoobuoo.minecraftenhanced.core.player.ProfileStatInstance;
 
 public class CriticalStrikeItemAttribute extends ItemAttribute {
     public CriticalStrikeItemAttribute(double minRoll, double maxRoll) {
@@ -17,12 +16,7 @@ public class CriticalStrikeItemAttribute extends ItemAttribute {
     }
 
     @Override
-    public void onDamage(DamageInstance damageInstance, ItemAttributeInstance instance) {
-        damageInstance.increaseCritStrikeChance(instance.getValue());
-    }
-
-    @Override
-    public void onCalc(ProfileStatInstance statInstance, ItemAttributeInstance instance) {
-
+    public void onCalc(EntityStatInstance statInstance, ItemAttributeInstance instance) {
+        statInstance.increaseCritStrikeChance(instance.getValue());
     }
 }

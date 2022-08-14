@@ -14,7 +14,8 @@ public class TestInventory extends CustomInventory {
         for(int i = 0; i < 9; i++){
             int finalI = i;
             slotMap.put(i, e -> {
-                System.out.println(finalI);
+                Inventory inv = new TestInventory(plugin, player).getInventory();
+                player.openInventory(inv);
             });
         }
     }

@@ -6,8 +6,9 @@ import com.buoobuoo.minecraftenhanced.core.area.AreaManager;
 import com.buoobuoo.minecraftenhanced.core.block.CustomBlockManager;
 import com.buoobuoo.minecraftenhanced.core.chat.ChatManager;
 import com.buoobuoo.minecraftenhanced.core.damage.DamageManager;
-import com.buoobuoo.minecraftenhanced.core.dialogue.DialogueManager;
 import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.ItemDropEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
 import com.buoobuoo.minecraftenhanced.core.event.DatabaseConnectEvent;
 import com.buoobuoo.minecraftenhanced.core.event.listener.*;
 import com.buoobuoo.minecraftenhanced.core.event.listener.mechanic.*;
@@ -55,7 +56,6 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
     private QuestManager questManager;
     private PlayerManager playerManager;
     private PermissionManager permissionManager;
-    private DialogueManager dialogueManager;
     private ItemAttributeManager itemAttributeManager;
     private EntityManager entityManager;
     private DamageManager damageManager;
@@ -102,7 +102,6 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
         questManager = new QuestManager(this);
         playerManager = new PlayerManager(this);
         permissionManager = new PermissionManager(this);
-        dialogueManager = new DialogueManager(this);
         itemAttributeManager = new ItemAttributeManager(this);
         entityManager = new EntityManager(this);
         damageManager = new DamageManager(this);
@@ -127,19 +126,24 @@ public class MinecraftEnhanced extends JavaPlugin implements Listener{
                 abilityManager,
                 chatManager,
                 areaManager,
+                damageManager,
 
                 //mechanic listeners
                 new EntityRegainHealthEventListener(this),
-                new EntityDamageByEntityEventListener(this),
                 new EntitySpawnEventListener(this),
                 new EntityDamageEventListener(this),
                 new EntityCombustEventListener(this),
-                new ItemRequirementEventListener(this),
+
                 new PlayerManagerItemListener(this),
                 new PlayerCreativeInteractEventListener(this),
+                new PlayerDeathEventListener(this),
+
+                new ProjectileHitEventListener(this),
+                new ItemRequirementEventListener(this),
                 new BlockGrowEventListener(this),
                 new NpcTeamTagListener(this),
                 new MoistureChangeEventListener(this)
+
         );
 
         //packet listener

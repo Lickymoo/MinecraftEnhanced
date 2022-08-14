@@ -1,14 +1,13 @@
 package com.buoobuoo.minecraftenhanced.core.item.interfaces;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.damage.DamageInstance;
+import com.buoobuoo.minecraftenhanced.core.entity.EntityStatInstance;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
 import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.ItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.ItemAttributeInstance;
 import com.buoobuoo.minecraftenhanced.core.item.additional.requirements.ItemRequirement;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
-import com.buoobuoo.minecraftenhanced.core.player.ProfileStatInstance;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
@@ -82,14 +81,7 @@ public abstract class AttributedItem extends CustomItem {
         ib.lore(3, "");
     }
 
-    public void onDamage(MinecraftEnhanced plugin, DamageInstance instance){
-        List<ItemAttributeInstance> attributeInstanceList = plugin.getItemAttributeManager().getAttribInstances(instance.getWeapon());
-        for(ItemAttributeInstance attributeInstance : attributeInstanceList){
-            attributeInstance.onDamage(instance);
-        }
-    }
-
-    public void onCalc(MinecraftEnhanced plugin, ItemStack item, ProfileStatInstance instance){
+    public void onCalc(MinecraftEnhanced plugin, ItemStack item, EntityStatInstance instance){
         List<ItemAttributeInstance> attributeInstanceList = plugin.getItemAttributeManager().getAttribInstances(item);
         for(ItemAttributeInstance attributeInstance : attributeInstanceList){
             attributeInstance.onCalc(instance);

@@ -1,25 +1,42 @@
 package com.buoobuoo.minecraftenhanced.core.item;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.item.interfaces.BlockItem;
-import com.buoobuoo.minecraftenhanced.core.item.interfaces.Modifier;
-import com.buoobuoo.minecraftenhanced.core.item.interfaces.NotStackable;
+import com.buoobuoo.minecraftenhanced.core.damage.DamageManager;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.*;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.type.MagicWeapon;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.type.RangedWeapon;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
+import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
+import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
+import net.minecraft.world.item.Item;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class CustomItemManager implements Listener {
@@ -58,7 +75,152 @@ public class CustomItemManager implements Listener {
             }
         }
 
-        return ib.create();
+        ItemStack itemStack = ib.create();
+        if(profileData != null)
+            itemStack = item.update(plugin, profileData, itemStack);
+        return itemStack;
+    }
+
+    @EventHandler
+    public void onRangedWeaponHit(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK && event.getAction() != Action.RIGHT_CLICK_AIR)
+            return;
+
+        ItemStack itemStack = event.getItem();
+
+        if (itemStack == null)
+            return;
+
+        CustomItemManager customItemManager = plugin.getCustomItemManager();
+        CustomItem handler = customItemManager.getRegistry().getHandler(itemStack);
+        if(handler == null)
+            return;
+        if(!(handler instanceof RangedWeapon rangedWeapon))
+            return;
+
+        Player player = event.getPlayer();
+        if(!customItemManager.canAttack(player))
+            return;
+
+        Vector playerDirection = player.getLocation().getDirection();
+        Projectile proj = player.launchProjectile(rangedWeapon.projectileType(), playerDirection);
+        proj.setShooter(player);
+    }
+
+    @EventHandler
+    public void onMagicWeaponHit(PlayerInteractEvent event){
+        if(event.getAction() != Action.LEFT_CLICK_AIR && event.getAction() != Action.LEFT_CLICK_BLOCK)
+            return;
+
+        ItemStack itemStack = event.getItem();
+
+        if(itemStack == null)
+            return;
+
+        CustomItemManager customItemManager = plugin.getCustomItemManager();
+        CustomItem handler = customItemManager.getRegistry().getHandler(itemStack);
+        if(handler == null)
+            return;
+        if(!(handler instanceof MagicWeapon magicWeapon))
+            return;
+        Player player = event.getPlayer();
+        if(!customItemManager.canAttack(player))
+            return;
+
+        float range = 7;
+
+        Location loc = player.getLocation();
+        double time = 0.0D;
+        Vector dir = loc.getDirection();
+
+        for (float i = 0; i < range * 4; i+= 1) {
+            time += 0.25D;
+            double x = dir.getX() * time;
+            double y = dir.getY() * time + 1.25D;
+            double z = dir.getZ() * time;
+            loc.add(x, y, z);
+            magicWeapon.spawnParticle(loc);
+            loc.subtract(x, y, z);
+        }
+
+        Entity entity = Util.getTarget(player, range);
+        if(entity != null) {
+            DamageManager damageManager = plugin.getDamageManager();
+
+            if(entity instanceof Player){
+                damageManager.handleDamageP2P(player, (Player)entity);
+            }else {
+                CustomEntity entityHandler = plugin.getEntityManager().getHandlerByEntity(entity);
+                if (entityHandler == null)
+                    return;
+
+                EntityDamageByEntityEvent ev = new EntityDamageByEntityEvent(player, entity, EntityDamageEvent.DamageCause.CUSTOM, 1);
+                Bukkit.getPluginManager().callEvent(ev);
+            }
+        }
+    }
+
+    private ConcurrentHashMap<UUID, Integer> cooldownList = new ConcurrentHashMap<>();
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void cooldownHit(PlayerInteractEvent event){
+        Player player = event.getPlayer();
+        ItemStack itemStack = event.getItem();
+
+        if(itemStack == null)
+            return;
+
+        CustomItem handler = plugin.getCustomItemManager().getRegistry().getHandler(itemStack);
+        if(handler == null)
+            return;
+        if(!(handler instanceof Cooldown))
+            return;
+
+        if(!canAttack(player)){
+            return;
+        }
+
+        Cooldown cooldown = (Cooldown)handler;
+
+        int cooldownTicks = cooldown.cooldownTicks();
+
+        Item item = Item.byId(itemStack.getType().ordinal());
+        ClientboundCooldownPacket packet = new ClientboundCooldownPacket(item, cooldownTicks);
+        Util.sendPacket(packet, player);
+
+        cooldownList.put(player.getUniqueId(), cooldownTicks);
+    }
+
+    public boolean canAttack(Player player){
+        if(cooldownList.getOrDefault(player.getUniqueId(), 0) >= 1){
+            return false;
+        }
+        return true;
+    }
+
+    @EventHandler
+    public void onQuestItemDrop(PlayerDropItemEvent event){
+        ItemStack item = event.getItemDrop().getItemStack();
+        CustomItem handler = getRegistry().getHandler(item);
+
+        if(!(handler instanceof QuestItem))
+            return;
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void tickCooldown(UpdateTickEvent event){
+        for(Map.Entry<UUID, Integer> entry : cooldownList.entrySet()){
+            int ticks = entry.getValue();
+            ticks -= 1;
+
+            if(ticks <= 0){
+                cooldownList.remove(entry.getKey());
+                continue;
+            }
+
+            cooldownList.put(entry.getKey(), ticks);
+        }
     }
 
     //Handler for placing a custom block (dont ask why its in this manager class lol)

@@ -4,13 +4,12 @@ import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.ability.Ability;
 import com.buoobuoo.minecraftenhanced.core.ability.AbilityCastType;
 import com.buoobuoo.minecraftenhanced.core.ability.AbilityType;
+import com.buoobuoo.minecraftenhanced.core.damage.DamageManager;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
 import com.buoobuoo.minecraftenhanced.core.vfx.particle.ParticleDirectory;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.util.BoundingBox;
 
 public class SlashAbility extends Ability {
@@ -62,8 +61,9 @@ public class SlashAbility extends Ability {
 
             Location loc = e.getLocation();
             if(boundingBox.contains(loc.toVector())){
-                EntityDamageByEntityEvent ev = new EntityDamageByEntityEvent(player, e, EntityDamageEvent.DamageCause.CUSTOM, ((percentDamage/100) * effectiveness));
-                Bukkit.getPluginManager().callEvent(ev);
+                DamageManager damageManager = plugin.getDamageManager();
+                CustomEntity handler = plugin.getEntityManager().getHandlerByEntity(e);
+                damageManager.handleDamageP2E(player, handler, ((percentDamage/100) * effectiveness));
             }
         }
     }

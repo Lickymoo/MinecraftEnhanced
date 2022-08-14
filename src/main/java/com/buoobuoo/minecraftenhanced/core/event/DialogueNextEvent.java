@@ -1,6 +1,5 @@
 package com.buoobuoo.minecraftenhanced.core.event;
 
-import com.buoobuoo.minecraftenhanced.core.area.Area;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;

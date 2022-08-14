@@ -1,18 +1,14 @@
 package com.buoobuoo.minecraftenhanced.core.entity;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.entity.impl.NpcMirrorEntity;
-import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.util.NpcMirrorEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.NpcEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.net.NetworkManager;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.net.ServerGamePacketListener;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
-import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.PathfinderMob;
@@ -24,14 +20,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.*;
 
 public abstract class AbstractNpc extends ServerPlayer implements NpcEntity {
-
-    //use bukkit entity for movement
-    protected CustomEntity mirrorEntity;
-    private ConcurrentLinkedDeque<UUID> viewers = new ConcurrentLinkedDeque<>();
 
     public AbstractNpc(Location loc) {
         super(((CraftWorld) loc.getWorld()).getHandle().getServer(), ((CraftWorld) loc.getWorld()).getHandle().getLevel(), new GameProfile(UUID.randomUUID(), ""), null);
@@ -46,15 +37,7 @@ public abstract class AbstractNpc extends ServerPlayer implements NpcEntity {
     public void entityTick() {
         NpcEntity.super.entityTick();
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!viewers.contains(player.getUniqueId())) {
-                viewers.add(player.getUniqueId());
-                show(player);
-            }
-        }
-
-        viewers.removeIf(uuid -> Bukkit.getPlayer(uuid) == null);
-
+        NpcMirrorEntity mirrorEntity = getChild("MIRROR_ENTITY");
         Location loc = mirrorEntity.asEntity().getBukkitEntity().getLocation();
 
         //Look at player
@@ -91,26 +74,41 @@ public abstract class AbstractNpc extends ServerPlayer implements NpcEntity {
     @Override
     public void spawnEntity(MinecraftEnhanced plugin, Location loc){
         NpcEntity.super.spawnEntity(plugin, loc);
-        mirrorEntity = plugin.getEntityManager().spawnEntity(NpcMirrorEntity.class, loc);
+        NpcMirrorEntity mirrorEntity = (NpcMirrorEntity) plugin.getEntityManager().spawnEntity(NpcMirrorEntity.class, loc);
+        addChild("MIRROR_ENTITY", mirrorEntity);
+
         hideScoreboard(plugin);
+        show();
+    }
+
+    public void show() {
+        hiddenPlayers.putIfAbsent(this, new HashSet<>());
+        Set<UUID> hidden = hiddenPlayers.get(this);
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            UUID uuid = player.getUniqueId();
+            //if hiddenPlayers = players to show to
+            if (getInvertHide() && !hidden.contains(uuid)) continue;
+            //if hiddenPlayers = players to hide from
+            if (!getInvertHide() && hidden.contains(uuid)) continue;
+
+            Util.sendPacket(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, (ServerPlayer) asEntity()), player);
+            Util.sendPacket(new ClientboundAddPlayerPacket((ServerPlayer) asEntity()), player);
+            Util.sendPacket(new ClientboundSetEntityDataPacket(asEntity().getBukkitEntity().getEntityId(), asEntity().getEntityData(), true), player);
+        }
     }
 
     @Override
     public void onDeath(){
         NpcEntity.super.onDeath();
+        NpcMirrorEntity mirrorEntity = getChild("MIRROR_ENTITY");
         MinecraftEnhanced.getInstance().getEntityManager().removeEntity(mirrorEntity);
     }
 
     @Override
     public PathfinderMob getPathfinderMob(){
+        NpcMirrorEntity mirrorEntity = getChild("MIRROR_ENTITY");
         return mirrorEntity.getPathfinderMob();
-    }
-
-    @Override
-    public void onDestroy(){
-        Util.sendPacketGlobal(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, (ServerPlayer) asEntity()));
-        Util.sendPacketGlobal(new ClientboundRemoveEntitiesPacket(asEntity().getBukkitEntity().getEntityId()));
-        MinecraftEnhanced.getInstance().getEntityManager().removeEntity(mirrorEntity);
     }
 
 }

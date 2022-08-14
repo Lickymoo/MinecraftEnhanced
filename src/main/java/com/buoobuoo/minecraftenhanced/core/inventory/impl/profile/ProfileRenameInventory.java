@@ -57,7 +57,7 @@ public class ProfileRenameInventory extends CustomInventory {
         Inventory inv = Bukkit.createInventory(this, InventoryType.ANVIL, Util.formatColour(title));
         inv.setItem(0, item);
 
-        ItemStack invis = new ItemBuilder(Material.PAPER).name(" ").setCustomModelData(1000).create();
+        ItemStack invis = new ItemBuilder(MatRepo.INVISIBLE).name(" ").create();
         inv.setItem(1,invis);
 
         return inv;
@@ -70,7 +70,7 @@ public class ProfileRenameInventory extends CustomInventory {
 
         String name = event.getName().trim();
 
-        ItemStack accept = new ItemBuilder(Material.PAPER).name(Util.formatColour("&a&lRename Profile")).setCustomModelData(1001).create();
+        ItemStack accept = new ItemBuilder(MatRepo.GREEN_TICK).name(Util.formatColour("&a&lRename Profile")).create();
         ItemMeta meta = accept.getItemMeta();
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         pdc.set(new NamespacedKey(plugin, "PROFILE_SEL"), PersistentDataType.STRING, name);

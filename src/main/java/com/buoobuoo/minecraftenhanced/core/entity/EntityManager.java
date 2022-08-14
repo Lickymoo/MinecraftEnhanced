@@ -1,58 +1,73 @@
 package com.buoobuoo.minecraftenhanced.core.entity;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.CreeperEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.RatEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.StoneGolemEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.npc.AramoreBlacksmithNpc;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.npc.CaptainYvesNpc;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.npc.HelpfulNpc;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.util.TagEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.pathfinding.EntityRoutePlanner;
+import com.buoobuoo.minecraftenhanced.core.entity.persistence.SuspendedInstance;
 import com.buoobuoo.minecraftenhanced.core.event.PlayerInteractNpcEvent;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
-import com.buoobuoo.minecraftenhanced.core.util.Hologram;
+import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
+import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
+import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import lombok.Getter;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.PathfinderMob;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
 public class EntityManager implements Listener {
 
     private final MinecraftEnhanced plugin;
     private final EntityRoutePlanner routePlanner;
+    private final ChunkWatcher chunkWatcher;
 
-    private final ArrayList<Class<? extends CustomEntity>> registeredEntityClasses = new ArrayList<>();
-    private final ConcurrentLinkedDeque<CustomEntity> registeredEntities = new ConcurrentLinkedDeque<>();
-    private final Map<CustomEntity, List<Entity>> hologramList = new HashMap<>();
+    private final ConcurrentLinkedDeque<Class<? extends CustomEntity>> registeredEntityClasses = new ConcurrentLinkedDeque<>();
+    private final ConcurrentLinkedQueue<CustomEntity> registeredEntities = new ConcurrentLinkedQueue<>();
     private final Map<PathfinderMob, Location> navigationMap = new HashMap<>();
 
     public EntityManager(MinecraftEnhanced plugin){
         this.plugin = plugin;
         this.routePlanner = new EntityRoutePlanner(plugin, this);
-        plugin.registerEvents(routePlanner);
+        this.chunkWatcher = new ChunkWatcher(plugin, this);
+        plugin.registerEvents(routePlanner, chunkWatcher);
 
         setRegisteredEntityClasses(
                 CaptainYvesNpc.class,
                 HelpfulNpc.class,
 
+                AramoreBlacksmithNpc.class,
+
                 RatEntity.class,
-                StoneGolemEntity.class
+                StoneGolemEntity.class,
+
+                CreeperEntity.class
         );
     }
 
@@ -64,10 +79,41 @@ public class EntityManager implements Listener {
         registeredEntityClasses.addAll(List.of(entities));
     }
 
+    public CustomEntity instantiateEntity(Class<? extends CustomEntity> entClass, Location location){
+        try {
+            CustomEntity entity = entClass.getConstructor(Location.class).newInstance(location);
+            return entity;
+        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex){
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    public CustomEntity instantiateEntity(Class<? extends CustomEntity> entClass, Location location, Class<?>[] constructorClasses, Object... objects) {
+        try {
+            constructorClasses = Util.addToBeginningOfArray(constructorClasses, Location.class);
+            Object[] constructorObjects = Util.addToBeginningOfArray(objects, location);
+
+            CustomEntity entity = entClass.getConstructor(constructorClasses).newInstance(constructorObjects);
+            return entity;
+        }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex){
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public void spawnInstance(CustomEntity entity, Location location) {
+        //load chunk
+        //TODO might change to use ChunkWatcher
+        Chunk chunk = location.getChunk();
+        entity.spawnEntity(plugin, location);
+    }
+
     public CustomEntity spawnEntity(Class<? extends CustomEntity> entClass, Location location) {
         try {
             CustomEntity entity = entClass.getConstructor(Location.class).newInstance(location);
-            entity.spawnEntity(plugin, location);
+            spawnInstance(entity, location);
             return entity;
         }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex){
             ex.printStackTrace();
@@ -82,8 +128,7 @@ public class EntityManager implements Listener {
             Object[] constructorObjects = Util.addToBeginningOfArray(objects, location);
 
             CustomEntity entity = entClass.getConstructor(constructorClasses).newInstance(constructorObjects);
-            getRegisteredEntities().forEach(e -> System.out.println(e));
-            entity.spawnEntity(plugin, location);
+            spawnInstance(entity, location);
             return entity;
         }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex){
             ex.printStackTrace();
@@ -101,7 +146,7 @@ public class EntityManager implements Listener {
             Object[] constructorObjects = Util.addToBeginningOfArray(objects, location);
 
             CustomEntity entity = entClass.getConstructor(constructorClasses).newInstance(constructorObjects);
-            entity.spawnEntity(plugin, location);
+            spawnInstance(entity, location);
             return entity;
         }catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex){
             ex.printStackTrace();
@@ -165,14 +210,15 @@ public class EntityManager implements Listener {
     }
 
     public void removeEntity(CustomEntity entity){
-        entity.onDestroy();
-
-        for(org.bukkit.entity.Entity hologram : hologramList.get(entity)){
-            hologram.remove();
-        }
-        entity.asEntity().remove(net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+        entity.destroyEntity();
+        entity.cleanup();
         registeredEntities.remove(entity);
-        hologramList.remove(entity);
+    }
+
+    //Destroys entity and children WITHOUT unregistering (For suspension)
+    public void suspendEntity(CustomEntity entity){
+        entity.destroyEntity();
+        entity.setSuspended(true);
     }
 
     public void destroyAll(){
@@ -180,6 +226,26 @@ public class EntityManager implements Listener {
            removeEntity(entity);
         }
     }
+
+    public void cleanUp(ProfileData profileData){
+        UUID uuid = profileData.getOwnerID();
+        for(CustomEntity ent : registeredEntities){
+            ent.hiddenPlayers.getOrDefault(ent, new HashSet<>()).remove(uuid);
+
+            if(ent.hiddenPlayers.getOrDefault(ent, new HashSet<>()).size() == 0 && ent.getInvertHide()) {
+                removeEntity(ent);
+            }
+        }
+    }
+
+    public CustomEntity getSuperParent(CustomEntity entity){
+        if(entity.getParent() == null)
+            return entity;
+
+        CustomEntity parent = entity.getParent();
+        return getSuperParent(parent);
+    }
+
     /*
     Listeners
      */
@@ -190,15 +256,10 @@ public class EntityManager implements Listener {
             return;
 
         CustomEntity handler = getHandlerByEntity(entity);
-
-        for(org.bukkit.entity.Entity hologram : hologramList.get(handler)){
-            hologram.remove();
-        }
+        event.setDroppedExp(0);
 
         handler.onDeath();
-
-        registeredEntities.remove(handler);
-        hologramList.remove(handler);
+        removeEntity(handler);
     }
 
     @EventHandler
@@ -211,50 +272,115 @@ public class EntityManager implements Listener {
 
         for(CustomEntity handler : registeredEntities) {
             handler.entityTick();
+            updateArmorStands(handler);
 
-            net.minecraft.world.entity.Entity entity = handler.asEntity();
-            org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
-
-            Location loc = bukkitEntity.getLocation();
-
-            double health = getEntityHealth(handler);
-            double maxHealth = handler.maxHealth();
-            double offset = handler.tagOffset();
-            int entityLevel = handler.entityLevel();
-            String level = CharRepo.numToTagString(entityLevel);
-            String name = handler.entityName();
-
-            int lines = handler.showHealth() ? 2 : 1;
-
-            //do not spawn if override tag is empty
-            if("".equals(handler.overrideTag()))
-                continue;
-
-            if(!hologramList.containsKey(handler)){
-                List<org.bukkit.entity.Entity> holo = Hologram.spawnHologram(plugin, loc, true, new String[lines]);
-                hologramList.put(handler, holo);
-            }
-
-            List<org.bukkit.entity.Entity> holo = hologramList.get(handler);
-
-            String nameText = handler.overrideTag() == null ? level + " " + name : handler.overrideTag();
-
-            if(handler.showHealth()){
-                ArmorStand healthAs = (ArmorStand) holo.get(0);
-                healthAs.setCustomName(CharRepo.HEART + Util.formatColour("&f" + (int) health + "/" + (int) maxHealth));
-                healthAs.teleport(loc.clone().add(0, 1.8 + offset, 0));
-
-                ArmorStand nameTag = (ArmorStand) holo.get(1);
-                nameTag.setCustomName(Util.formatColour(nameText));
-                nameTag.teleport(loc.clone().add(0, 2.1 + offset, 0));
-            }else{
-                ArmorStand nameTag = (ArmorStand) holo.get(0);
-                nameTag.setCustomName(Util.formatColour(nameText));
-                nameTag.teleport(loc.clone().add(0, 1.8 + offset, 0));
-            }
         }
     }
 
+    @EventHandler
+    public void onCustomItemPickup(PlayerPickupItemEvent event){
+
+        CustomEntity handler = getHandlerByEntity(event.getItem());
+        if(handler == null)
+            return;
+
+        Player player = event.getPlayer();
+        if(!handler.getInvertHide())
+            return;
+
+        UUID playerUUID = player.getUniqueId();
+        for(UUID uuid : handler.hiddenPlayers()){
+            if(uuid.equals(playerUUID))
+                return;
+        }
+        event.setCancelled(true);
+    }
+
+    public void updateArmorStands(CustomEntity handler){
+        if(handler instanceof TagEntity) return;
+
+        net.minecraft.world.entity.Entity entity = handler.asEntity();
+        org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
+
+        Location loc = bukkitEntity.getLocation();
+
+        double health = getEntityHealth(handler);
+        double maxHealth = handler.maxHealth();
+        double offset = handler.tagOffset();
+        int entityLevel = handler.entityLevel();
+        String level = CharRepo.numToTagString(entityLevel);
+        String name = handler.entityName();
+
+        int lines = handler.showHealth() ? 2 : 1;
+
+        //do not spawn if override tag is empty
+        if("".equals(handler.overrideTag()))
+            return;
+
+        TagEntity healthTag = handler.getChild("HEALTH_TAG");
+        TagEntity nameTag = handler.getChild("NAME_TAG");
+
+        if(healthTag == null && handler.showHealth()){
+            healthTag = spawnHologram(loc, "").get(0);
+            handler.addChild("HEALTH_TAG", healthTag);
+        }
+        if(nameTag == null){
+            nameTag = spawnHologram(loc, "").get(0);
+            handler.addChild("NAME_TAG", nameTag);
+        }
+
+        String nameText = handler.overrideTag() == null ? level + " " + name : handler.overrideTag();
+
+
+        if(handler.showHealth()){
+            ArmorStand healthAs = (ArmorStand) healthTag.asEntity().getBukkitEntity();
+            healthAs.setCustomName(CharRepo.HEART + Util.formatColour("&f" + (int) health + "/" + (int) maxHealth));
+            healthAs.teleport(loc.clone().add(0, 1.8 + offset, 0));
+
+            ArmorStand nameAs = (ArmorStand) nameTag.asEntity().getBukkitEntity();
+            nameAs.setCustomName(Util.formatColour(nameText));
+            nameAs.teleport(loc.clone().add(0, 2.1 + offset, 0));
+        }else{
+            ArmorStand nameAs = (ArmorStand) nameTag.asEntity().getBukkitEntity();
+            nameAs.setCustomName(Util.formatColour(nameText));
+            nameAs.teleport(loc.clone().add(0, 1.8 + offset, 0));
+        }
+    }
+
+    public List<TagEntity> spawnHologram(Location loc, int killAfterTicks, String... lines) {
+        List<TagEntity> ents = spawnHologram(loc, lines);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            for(TagEntity ent : ents){
+                removeEntity(ent);
+            }
+        }, killAfterTicks);
+        return ents;
+    }
+
+    public List<TagEntity> spawnHologram(Location loc, String... lines){
+        int i = 1;
+        ArrayList<TagEntity> stands = new ArrayList<>();
+        for(String layer : lines) {
+            layer = layer == null ? "" : layer;
+
+            TagEntity tag = (TagEntity) spawnEntity(TagEntity.class, loc, layer);
+            ArmorStand as = (ArmorStand) tag.asEntity().getBukkitEntity();
+            as.teleport(loc.clone().add(0, .5+i*.4D, 0));
+
+            as.setInvisible(true);
+            as.setGravity(false);
+            as.setCustomName(Util.formatColour(layer));
+            as.setCustomNameVisible(true);
+            as.setInvulnerable(true);
+            as.setMarker(true);
+            as.setCollidable(false);
+
+            i++;
+            stands.add(tag);
+        }
+        return stands;
+    }
 }
 
 

@@ -3,6 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.inventory.impl;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.party.PartyInviteUpdateEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.party.Party;
 import com.buoobuoo.minecraftenhanced.core.party.PartyManager;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
@@ -71,7 +72,7 @@ public class EmptyPartyInventory extends CustomInventory {
     public Inventory getInventory() {
         Inventory inv = Bukkit.createInventory(this, size, Util.formatColour(title));
 
-        ItemStack create = new ItemBuilder(Material.PAPER).name("&7Create Party").setCustomModelData(1000).create();
+        ItemStack create = new ItemBuilder(MatRepo.INVISIBLE).name("&7Create Party").create();
         inv.setItem(27, create);
         inv.setItem(28, create);
 

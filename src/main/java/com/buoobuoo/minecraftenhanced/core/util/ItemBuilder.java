@@ -84,6 +84,15 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder nbtInteger(Plugin plugin, String id, int val) {
+        ItemMeta meta = this.item.getItemMeta();
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        pdc.set(new NamespacedKey(plugin, id), PersistentDataType.INTEGER, val);
+        this.item.setItemMeta(meta);
+        return this;
+    }
+
+
     public ItemBuilder nbtInt(Plugin plugin, String id, int val) {
         ItemMeta meta = this.item.getItemMeta();
         PersistentDataContainer pdc = meta.getPersistentDataContainer();

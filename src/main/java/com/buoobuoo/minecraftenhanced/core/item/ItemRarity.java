@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public enum ItemRarity {
     COMMON("&f", CharRepo.RARITY_COMMON),
-    MAGIC("&9", CharRepo.RARITY_MAGIC),
+    MAGIC("&9", CharRepo.RARITY_UNCOMMON),
     RARE("&e", CharRepo.RARITY_RARE),
     ULTRA_RARE("&d", CharRepo.RARITY_ULTRA_RARE),
     UNIQUE("&6", null);

@@ -37,13 +37,15 @@ public class PlayerData {
     }
 
     public boolean setCurrentProfile(UUID profileID){
+        Player player = Bukkit.getPlayer(ownerID);
         if(activeProfileID != null){
             save(plugin);
+            plugin.getEntityManager().cleanUp(plugin.getPlayerManager().getProfile(activeProfileID));
             plugin.getPlayerManager().removeProfile(activeProfileID);
+            plugin.getQuestManager().clearPlayer(player);
         }
 
         activeProfileID = null;
-        Player player = Bukkit.getPlayer(ownerID);
         player.getInventory().clear();
 
         if(profileID == null)

@@ -2,7 +2,6 @@ package com.buoobuoo.minecraftenhanced.core.item.impl;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.item.ItemRarity;
-import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.impl.defense.BubyItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.impl.defense.MaximumHealthItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.impl.defense.MaximumManaItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.additional.requirements.impl.PlayerLevelRequirement;
@@ -20,7 +19,6 @@ public class BubysHelmetItem extends AttributedItem implements NotStackable, Ite
         this.setRarity(ItemRarity.ULTRA_RARE);
         this.addRequirements(new PlayerLevelRequirement(100));
 
-        this.addAttributes(new BubyItemAttribute(0, 0));
         this.addAttributes(new MaximumHealthItemAttribute(100, 100));
         this.addAttributes(new MaximumManaItemAttribute(100, 100));
     }

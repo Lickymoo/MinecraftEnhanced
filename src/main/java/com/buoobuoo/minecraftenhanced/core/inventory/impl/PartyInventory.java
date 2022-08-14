@@ -3,6 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.inventory.impl;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.party.PartyUpdateEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
+import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.party.Party;
 import com.buoobuoo.minecraftenhanced.core.party.PartyManager;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
@@ -101,23 +102,23 @@ public class PartyInventory extends CustomInventory {
         boolean isLeader = party.isLeader(player);
 
         if(isLeader) {
-            ItemStack invite = new ItemBuilder(Material.PAPER).name("&7Invite Player").setCustomModelData(1000).create();
+            ItemStack invite = new ItemBuilder(MatRepo.INVISIBLE).name("&7Invite Player").create();
             inv.setItem(27, invite);
             inv.setItem(28, invite);
 
-            ItemStack promote = new ItemBuilder(Material.PAPER).name("&7Promote Player").setCustomModelData(1000).create();
+            ItemStack promote = new ItemBuilder(MatRepo.INVISIBLE).name("&7Promote Player").create();
             inv.setItem(29, promote);
             inv.setItem(30, promote);
 
-            ItemStack kick = new ItemBuilder(Material.PAPER).name("&7Kick Player").setCustomModelData(1000).create();
+            ItemStack kick = new ItemBuilder(MatRepo.INVISIBLE).name("&7Kick Player").create();
             inv.setItem(31, kick);
             inv.setItem(32, kick);
 
-            ItemStack leave = new ItemBuilder(Material.PAPER).name("&cDisband Party").setCustomModelData(1000).create();
+            ItemStack leave = new ItemBuilder(MatRepo.INVISIBLE).name("&cDisband Party").create();
             inv.setItem(34, leave);
             inv.setItem(35, leave);
         }else{
-            ItemStack leave = new ItemBuilder(Material.PAPER).name("&7Leave Party").setCustomModelData(1000).create();
+            ItemStack leave = new ItemBuilder(MatRepo.INVISIBLE).name("&7Leave Party").create();
             inv.setItem(34, leave);
             inv.setItem(35, leave);
         }

@@ -4,11 +4,15 @@ package com.buoobuoo.minecraftenhanced.command.impl;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.inventory.impl.quest.QuestMainInventory;
+import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.quest.QuestManager;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 @CommandAlias("quest|quests")
 public class QuestCommand extends BaseCommand {
@@ -21,23 +25,32 @@ public class QuestCommand extends BaseCommand {
         this.questManager = plugin.getQuestManager();
     }
 
+    @Default
+    public void quest(Player player){
+        Inventory inv = new QuestMainInventory(plugin ,player).getInventory();
+        player.openInventory(inv);
+    }
+
     @Subcommand("start")
     @CommandCompletion("@players @quests")
     public void start(Player player, OnlinePlayer target, String questID){
-        questManager.beginQuest(target.getPlayer(), questManager.getQuestByID(questID));
+        ProfileData profileData = plugin.getPlayerManager().getProfile(target.getPlayer());
+        questManager.startQuest(questID, profileData);
     }
 
     @Subcommand("finish")
     @CommandCompletion("@players @quests")
     public void finish(Player player, OnlinePlayer target, String questID){
         //Force start
-        questManager.completeQuest(target.getPlayer(), questManager.getQuestByID(questID));
+        ProfileData profileData = plugin.getPlayerManager().getProfile(target.getPlayer());
+        questManager.finishQuest(questID, profileData);
     }
 
     @Subcommand("reset")
     @CommandCompletion("@players @quests")
     public void reset(Player player, OnlinePlayer target, String questID){
-        questManager.resetQuest(target.getPlayer(), questManager.getQuestByID(questID));
+        ProfileData profileData = plugin.getPlayerManager().getProfile(target.getPlayer());
+        questManager.resetQuest(questID, profileData);
     }
 
 

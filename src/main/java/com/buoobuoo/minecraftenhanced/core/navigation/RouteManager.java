@@ -57,7 +57,7 @@ public class RouteManager {
             //2d
             double dist = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
 
-            for (int i = 0; i < dist; i += 5) {
+            for (int i = 0; i < dist; i += 12) {
                 double t = i / dist;
                 double nX = (1 - t) * x2 + (t * x1);
                 double nZ = (1 - t) * z2 + (t * z1);

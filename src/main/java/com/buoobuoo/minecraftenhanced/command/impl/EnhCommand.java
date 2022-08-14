@@ -9,19 +9,19 @@ import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.ability.Ability;
 import com.buoobuoo.minecraftenhanced.core.ability.AbilityManager;
 import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.util.TagEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
 import com.buoobuoo.minecraftenhanced.core.event.update.PlayerLevelUpEvent;
-import com.buoobuoo.minecraftenhanced.core.item.AbilityGemItem;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItems;
+import com.buoobuoo.minecraftenhanced.core.item.impl.AbilityGemItem;
 import com.buoobuoo.minecraftenhanced.core.player.PlayerData;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
-import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
-import com.buoobuoo.minecraftenhanced.rework.quest.QuestLine;
-import com.buoobuoo.minecraftenhanced.rework.quest.impl.TestQuest;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attributable;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -56,13 +56,7 @@ public class EnhCommand extends BaseCommand {
 
         @Subcommand("test")
         public void test(Player player){
-            TestQuest questLine = new TestQuest(plugin);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                questLine.setDeterminant(player, "killed rat", true);
-                }, 80);
-
-            plugin.registerEvents(questLine);
-            questLine.start(player);
+            plugin.getEntityManager().spawnEntity(TagEntity.class, player.getLocation(), "TESTING");
         }
 
         @Subcommand("give")
@@ -110,6 +104,9 @@ public class EnhCommand extends BaseCommand {
             EntityManager entityManager = plugin.getEntityManager();
             Class<? extends CustomEntity> clazz = entityManager.getHandlerClassByName(entityClass);
             CustomEntity ent = entityManager.spawnEntity(clazz, player.getLocation());
+
+            Attributable attr = (Attributable) ent.asEntity().getBukkitEntity();
+            attr.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(.3);
         }
 
         @Subcommand("clear")

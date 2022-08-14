@@ -2,7 +2,7 @@ package com.buoobuoo.minecraftenhanced.core.status.impl;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
-import com.buoobuoo.minecraftenhanced.core.player.tempmodifier.TemporaryDamageModifier;
+import com.buoobuoo.minecraftenhanced.core.player.tempmodifier.TemporaryStatModifier;
 import com.buoobuoo.minecraftenhanced.core.status.StatusEffect;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 
@@ -22,8 +22,8 @@ public class FlagellantStatusEffect extends StatusEffect {
 
     @Override
     public void onTick() {
-        getProfileData().getTemporaryDamageModifiers().add(
-                new TemporaryDamageModifier(inst -> {
+        getProfileData().getOnHitStatModifier().add(
+                new TemporaryStatModifier(inst -> {
                     inst.increaseDamageDealt(damage);
                     onEnd();
                 })
