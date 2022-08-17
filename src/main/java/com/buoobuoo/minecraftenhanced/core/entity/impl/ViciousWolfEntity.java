@@ -14,6 +14,7 @@ import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 
@@ -32,6 +33,7 @@ public class ViciousWolfEntity extends Wolf implements CustomEntity {
         this.goalSelector.addGoal(5, new MeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
 
+        this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal(this, true));
         this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, Player.class, 4, true, false, e -> {
             if(getOrigin() == null)
                 return true;
@@ -39,13 +41,11 @@ public class ViciousWolfEntity extends Wolf implements CustomEntity {
             Location origin = getOrigin().getLeft();
             int maxRange = getOrigin().getRight();
 
-            LivingEntity ent = e;
-            Location entityLoc = ent.getBukkitEntity().getLocation();
+            Location wolfLoc = getBukkitEntity().getLocation();
 
-            return origin.distance(entityLoc) <= maxRange;
+
+            return origin.distance(wolfLoc) <= maxRange;
         }));
-
-        //this.targetSelector.addGoal(7, new NearestAttackableTargetGoal(this, AbstractSkeleton.class, false));
     }
 
     @Override
@@ -76,16 +76,6 @@ public class ViciousWolfEntity extends Wolf implements CustomEntity {
     @Override
     public int entityLevel() {
         return 2;
-    }
-
-    @Override
-    public boolean showHealth() {
-        return true;
-    }
-
-    @Override
-    public String overrideTag() {
-        return null;
     }
 }
 

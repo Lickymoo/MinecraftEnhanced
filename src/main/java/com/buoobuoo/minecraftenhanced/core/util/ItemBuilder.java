@@ -4,6 +4,7 @@ package com.buoobuoo.minecraftenhanced.core.util;
 import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -23,6 +24,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
 public class ItemBuilder {
     private ItemStack item;
     private Map<Integer, List<String>> loreTierMap = new HashMap<>();
@@ -65,6 +67,11 @@ public class ItemBuilder {
         ItemMeta meta = this.item.getItemMeta();
         meta.setDisplayName(Util.formatColour(name));
         this.item.setItemMeta(meta);
+        return this;
+    }
+
+    public ItemBuilder setMaterial(Material mat){
+        this.item.setType(mat);
         return this;
     }
 

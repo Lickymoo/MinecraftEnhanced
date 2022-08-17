@@ -37,6 +37,7 @@ public class CommandManager {
         registerCommand(new DialogueCommand(plugin));
         registerCommand(new QuestCommand(plugin));
         registerCommand(new ProfileCommand(plugin));
+        registerCommand(new FriendCommand(plugin));
     }
 
     private void registerCommand(BaseCommand... cmds) {

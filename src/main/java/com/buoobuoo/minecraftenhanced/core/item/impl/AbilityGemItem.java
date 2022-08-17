@@ -7,7 +7,12 @@ import com.buoobuoo.minecraftenhanced.core.item.interfaces.NotStackable;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
+
+import java.util.List;
+import java.util.Random;
 
 @Getter
 @Setter
@@ -17,6 +22,8 @@ public class AbilityGemItem extends CustomItem implements NotStackable {
     public AbilityGemItem(Ability ability) {
         super("ABILITY_GEM", Material.PAPER, "", "");
         this.ability = ability;
+        this.lore = ability == null ? null : ability.getLore();
+        this.displayName = ability == null ? null : ability.getName();
     }
 
     @Override

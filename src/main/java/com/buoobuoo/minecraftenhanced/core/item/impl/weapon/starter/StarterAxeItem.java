@@ -5,16 +5,13 @@ import com.buoobuoo.minecraftenhanced.core.item.ItemRarity;
 import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
 import com.buoobuoo.minecraftenhanced.core.item.additional.attributes.impl.attack.BasePhysicalItemAttribute;
 import com.buoobuoo.minecraftenhanced.core.item.additional.requirements.impl.PlayerLevelRequirement;
-import com.buoobuoo.minecraftenhanced.core.item.interfaces.AttributedItem;
-import com.buoobuoo.minecraftenhanced.core.item.interfaces.Cooldown;
-import com.buoobuoo.minecraftenhanced.core.item.interfaces.ItemLevel;
-import com.buoobuoo.minecraftenhanced.core.item.interfaces.NotStackable;
+import com.buoobuoo.minecraftenhanced.core.item.interfaces.*;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.type.MeleeWeapon;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 
-public class StarterAxeItem extends AttributedItem implements NotStackable, ItemLevel, MeleeWeapon, Cooldown {
+public class StarterAxeItem extends AttributedItem implements NotStackable, ItemLevel, MeleeWeapon, Cooldown, AlternateHeldItem {
     public StarterAxeItem() {
-        super("STARTER_AXE", MatRepo.STARTER_AXE, "Starter Axe");
+        super("STARTER_AXE", MatRepo.STARTER_AXE_ICON, "Starter Axe");
 
         this.setRarity(ItemRarity.COMMON);
         this.addRequirements(new PlayerLevelRequirement(1));
@@ -36,5 +33,10 @@ public class StarterAxeItem extends AttributedItem implements NotStackable, Item
     public void modifierCreate(MinecraftEnhanced plugin, ItemBuilder ib) {
         NotStackable.super.modifierCreate(plugin, ib);
         ItemLevel.super.modifierCreate(plugin, ib);
+    }
+
+    @Override
+    public MatRepo swapoutItem() {
+        return MatRepo.STARTER_AXE;
     }
 }

@@ -31,6 +31,7 @@ public abstract class CustomInventory implements InventoryHolder, Listener {
         this.player = player;
 
         plugin.getCustomInventoryManager().getRegistry().registerInventory(this);
+        addDefaultHandler(null);
     }
 
     public void addHandler(Consumer<InventoryClickEvent> event, int... slots){

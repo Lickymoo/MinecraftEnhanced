@@ -8,9 +8,7 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -22,6 +20,9 @@ public class PlayerData {
     private List<UUID> profileIDs = new ArrayList<>();
     private PermissionGroup group = PermissionGroup.MEMBER;
     private int maxProfiles = 7;
+
+    private List<UUID> friends = new ArrayList<>();
+    private List<UUID> friendRequestsReceived = new ArrayList<>();
 
     @DoNotSerialize
     private UUID activeProfileID;
@@ -43,6 +44,8 @@ public class PlayerData {
             plugin.getEntityManager().cleanUp(plugin.getPlayerManager().getProfile(activeProfileID));
             plugin.getPlayerManager().removeProfile(activeProfileID);
             plugin.getQuestManager().clearPlayer(player);
+
+            player.resetPlayerWeather();
         }
 
         activeProfileID = null;
@@ -79,6 +82,10 @@ public class PlayerData {
 
     public boolean isProfileCapacity(){
         return (profileIDs.size() >= maxProfiles);
+    }
+
+    public Player getPlayer(){
+        return Bukkit.getPlayer(ownerID);
     }
 
 }

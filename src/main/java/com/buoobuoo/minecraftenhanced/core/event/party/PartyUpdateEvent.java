@@ -1,6 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.event.party;
 
-import com.buoobuoo.minecraftenhanced.core.party.Party;
+import com.buoobuoo.minecraftenhanced.core.social.party.Party;
 import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

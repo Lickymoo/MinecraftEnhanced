@@ -37,7 +37,7 @@ public class PlayerManagerItemListener implements Listener {
 
         Player player = event.getPlayer();
 
-        Inventory menu = new PlayerMenuMainInventory(plugin, player).getInventory();
+        Inventory menu = new PlayerMenuMainInventory(plugin, player, player).getInventory();
         player.openInventory(menu);
     }
 
@@ -56,7 +56,7 @@ public class PlayerManagerItemListener implements Listener {
 
         Player player = (Player) event.getWhoClicked();
 
-        Inventory menu = new PlayerMenuMainInventory(plugin, player).getInventory();
+        Inventory menu = new PlayerMenuMainInventory(plugin, player, player).getInventory();
         player.openInventory(menu);
     }
 }

@@ -13,6 +13,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import lombok.Getter;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bukkit.Bukkit;
@@ -29,6 +30,9 @@ import java.util.*;
 public class MongoHook {
 
     private final MinecraftEnhanced plugin;
+
+    @Getter
+    private boolean connected;
 
     MongoCollection<Document> collection = null;
     MongoClient mongoClient;
@@ -68,9 +72,9 @@ public class MongoHook {
             mongoClient = MongoClients.create(settings);
 
             mongoDatabase = mongoClient.getDatabase(defaultDB);
-            collection = mongoDatabase.getCollection("players");
             Bukkit.getConsoleSender().sendMessage("Successfully connected to MongoDB");
             Bukkit.getScheduler().runTaskLater(plugin, () -> {Bukkit.getServer().getPluginManager().callEvent(new DatabaseConnectEvent());}, 1);
+            connected = true;
         }catch(Exception e) {
             e.printStackTrace();
         }

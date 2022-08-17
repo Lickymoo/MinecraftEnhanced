@@ -1,6 +1,7 @@
 package com.buoobuoo.minecraftenhanced.core.area;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.area.impl.aramore.AramoreAbandonedShrineArea;
 import com.buoobuoo.minecraftenhanced.core.area.impl.aramore.AramoreArea;
 import com.buoobuoo.minecraftenhanced.core.area.impl.aramore.AramoreWolfArea;
 import com.buoobuoo.minecraftenhanced.core.event.AreaEnterEvent;
@@ -29,7 +30,8 @@ public class AreaManager implements Listener {
         registerAreas(
                 //aramore area
                 new AramoreArea(),
-                new AramoreWolfArea()
+                new AramoreWolfArea(),
+                new AramoreAbandonedShrineArea()
 
         );
     }
@@ -63,6 +65,10 @@ public class AreaManager implements Listener {
             return;
 
         Player player = event.getPlayer();
+
+        if(!plugin.getPlayerManager().hasActive(player))
+            return;
+
         ProfileData profileData = plugin.getPlayerManager().getProfile(player);
 
         Location loc = player.getLocation();

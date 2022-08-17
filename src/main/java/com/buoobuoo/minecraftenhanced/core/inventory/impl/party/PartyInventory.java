@@ -1,11 +1,11 @@
-package com.buoobuoo.minecraftenhanced.core.inventory.impl;
+package com.buoobuoo.minecraftenhanced.core.inventory.impl.party;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.party.PartyUpdateEvent;
 import com.buoobuoo.minecraftenhanced.core.inventory.CustomInventory;
 import com.buoobuoo.minecraftenhanced.core.item.MatRepo;
-import com.buoobuoo.minecraftenhanced.core.party.Party;
-import com.buoobuoo.minecraftenhanced.core.party.PartyManager;
+import com.buoobuoo.minecraftenhanced.core.social.party.Party;
+import com.buoobuoo.minecraftenhanced.core.social.party.PartyManager;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;

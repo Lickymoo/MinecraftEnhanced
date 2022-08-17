@@ -2,6 +2,10 @@ package com.buoobuoo.minecraftenhanced.core.entity.impl.util;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.HideHealthTag;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.HideNameTag;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.Invisible;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.Invulnerable;
 import com.buoobuoo.minecraftenhanced.core.entity.pathfinding.MoveToLocationGoal;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
@@ -12,7 +16,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 //Used to mirror actions onto npc
-public class NpcMirrorEntity extends Zombie implements CustomEntity {
+public class NpcMirrorEntity extends Zombie implements CustomEntity, Invulnerable, Invisible, HideNameTag, HideHealthTag {
     public NpcMirrorEntity(Location loc) {
         super(EntityType.ZOMBIE, ((CraftWorld) loc.getWorld()).getHandle());
 
@@ -30,48 +34,13 @@ public class NpcMirrorEntity extends Zombie implements CustomEntity {
     }
 
     @Override
-    public void entityTick(){
-        PotionEffect invisibility = new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, Integer.MAX_VALUE, false, false);
-        invisibility.apply((org.bukkit.entity.LivingEntity) asEntity().getBukkitEntity());
-    }
-
-    @Override
     public String entityID() {
         return "NPC_MIRROR";
     }
 
     @Override
     public String entityName() {
-        return "";
+        return "NPC_MIRROR";
     }
 
-    @Override
-    public String overrideTag() {
-        return "";
-    }
-
-    @Override
-    public double maxHealth() {
-        return 10;
-    }
-
-    @Override
-    public double damage() {
-        return 0;
-    }
-
-    @Override
-    public double tagOffset() {
-        return 0;
-    }
-
-    @Override
-    public int entityLevel() {
-        return 0;
-    }
-
-    @Override
-    public boolean showHealth() {
-        return false;
-    }
 }

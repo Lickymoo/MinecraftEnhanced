@@ -3,6 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.block.impl;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.ToolType;
 import com.buoobuoo.minecraftenhanced.core.block.CustomBlock;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.util.EmptyEntity;
 import com.buoobuoo.minecraftenhanced.core.vfx.cinematic.CinematicFrame;
 import com.buoobuoo.minecraftenhanced.core.vfx.cinematic.CinematicSequence;
 import org.bukkit.Instrument;
@@ -39,7 +40,7 @@ public class MysteryBoxBlock extends CustomBlock {
         Location blockLoc = event.getClickedBlock().getLocation();
 
 
-        Entity stand = plugin.getSpectatorManager().viewLoc(player, startLoc);
+        EmptyEntity stand = plugin.getSpectatorManager().viewLoc(player, startLoc);
 
         CinematicFrame[] move1 = new CinematicFrame[] {
                 new CinematicFrame(10, z -> z.playSound(blockLoc, Sound.BLOCK_ANVIL_LAND, 1, 1)),

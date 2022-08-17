@@ -43,16 +43,6 @@ public class StoneGolemEntity extends IronGolem implements ModelEntity {
     }
 
     @Override
-    public boolean showHealth() {
-        return true;
-    }
-
-    @Override
-    public String overrideTag() {
-        return null;
-    }
-
-    @Override
     public String modelName() {
         return "stonegolem";
     }

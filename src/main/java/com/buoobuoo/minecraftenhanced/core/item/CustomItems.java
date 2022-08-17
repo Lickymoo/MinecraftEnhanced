@@ -1,7 +1,7 @@
 package com.buoobuoo.minecraftenhanced.core.item;
 
 import com.buoobuoo.minecraftenhanced.core.item.impl.*;
-import com.buoobuoo.minecraftenhanced.core.item.impl.quest.act1.ACT1_MQ3_NecklaceItem;
+import com.buoobuoo.minecraftenhanced.core.item.impl.quest.act1.ACT1_MQ2_NecklaceItem;
 import com.buoobuoo.minecraftenhanced.core.item.impl.weapon.IceSwordItem;
 import com.buoobuoo.minecraftenhanced.core.item.impl.weapon.TestBowItem;
 import com.buoobuoo.minecraftenhanced.core.item.impl.weapon.starter.StarterAxeItem;
@@ -37,7 +37,7 @@ public enum CustomItems {
     ABILITY_GEM(new AbilityGemItem(null)),
 
     //quest
-    ACT1_MQ3_NECKLACE(new ACT1_MQ3_NecklaceItem());
+    ACT1_MQ3_NECKLACE(new ACT1_MQ2_NecklaceItem());
 
     private CustomItem handler;
     CustomItems(CustomItem handler){

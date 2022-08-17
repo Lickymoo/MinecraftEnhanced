@@ -3,6 +3,8 @@ package com.buoobuoo.minecraftenhanced.core.entity.impl;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.HideHealthTag;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.HideNameTag;
 import lombok.Getter;
 import net.minecraft.world.entity.item.ItemEntity;
 import org.bukkit.Bukkit;
@@ -12,7 +14,7 @@ import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
 @Getter
-public class ItemDropEntity extends ItemEntity implements CustomEntity {
+public class ItemDropEntity extends ItemEntity implements CustomEntity, HideNameTag, HideHealthTag {
 
     private final ItemStack itemStack;
 
@@ -40,34 +42,5 @@ public class ItemDropEntity extends ItemEntity implements CustomEntity {
         return "DroppedItem";
     }
 
-    @Override
-    public double maxHealth() {
-        return 0;
-    }
-
-    @Override
-    public double damage() {
-        return 0;
-    }
-
-    @Override
-    public double tagOffset() {
-        return 0;
-    }
-
-    @Override
-    public int entityLevel() {
-        return 0;
-    }
-
-    @Override
-    public boolean showHealth() {
-        return true;
-    }
-
-    @Override
-    public String overrideTag() {
-        return "";
-    }
 }
 

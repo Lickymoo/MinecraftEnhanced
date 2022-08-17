@@ -1,7 +1,6 @@
 package com.buoobuoo.minecraftenhanced.core.entity;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.entity.impl.CreeperEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.RatEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.StoneGolemEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.npc.AramoreBlacksmithNpc;
@@ -9,22 +8,19 @@ import com.buoobuoo.minecraftenhanced.core.entity.impl.npc.CaptainYvesNpc;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.npc.HelpfulNpc;
 import com.buoobuoo.minecraftenhanced.core.entity.impl.util.TagEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.AdditionalTag;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.HideHealthTag;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.HideNameTag;
 import com.buoobuoo.minecraftenhanced.core.entity.pathfinding.EntityRoutePlanner;
-import com.buoobuoo.minecraftenhanced.core.entity.persistence.SuspendedInstance;
 import com.buoobuoo.minecraftenhanced.core.event.PlayerInteractNpcEvent;
 import com.buoobuoo.minecraftenhanced.core.event.update.UpdateTickEvent;
-import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
-import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import lombok.Getter;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.datafix.fixes.GoatHornIdFix;
 import net.minecraft.world.entity.PathfinderMob;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -32,7 +28,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -40,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 @Getter
 public class EntityManager implements Listener {
@@ -65,10 +61,14 @@ public class EntityManager implements Listener {
                 AramoreBlacksmithNpc.class,
 
                 RatEntity.class,
-                StoneGolemEntity.class,
-
-                CreeperEntity.class
+                StoneGolemEntity.class
         );
+    }
+
+    public void initFixtures(){
+        //register pemanent fixuture entities
+        World mainWorld = MinecraftEnhanced.getMainWorld();
+        AramoreBlacksmithNpc aramoreBlacksmithNpc = (AramoreBlacksmithNpc) spawnEntity(AramoreBlacksmithNpc.class, new Location(mainWorld, 162.5, 66, 78.5, 180, 0));
     }
 
     public void registerEntities(CustomEntity entity){
@@ -231,6 +231,7 @@ public class EntityManager implements Listener {
         UUID uuid = profileData.getOwnerID();
         for(CustomEntity ent : registeredEntities){
             ent.hiddenPlayers.getOrDefault(ent, new HashSet<>()).remove(uuid);
+            ent.shownPlayers.getOrDefault(ent, new ConcurrentSkipListSet<>()).remove(uuid);
 
             if(ent.hiddenPlayers.getOrDefault(ent, new HashSet<>()).size() == 0 && ent.getInvertHide()) {
                 removeEntity(ent);
@@ -311,39 +312,74 @@ public class EntityManager implements Listener {
         String level = CharRepo.numToTagString(entityLevel);
         String name = handler.entityName();
 
-        int lines = handler.showHealth() ? 2 : 1;
+        //health
 
-        //do not spawn if override tag is empty
-        if("".equals(handler.overrideTag()))
-            return;
+        /*
+        Tag order
+        ADDITIONAL
+        NAME
+        HEALTH
+         */
 
-        TagEntity healthTag = handler.getChild("HEALTH_TAG");
-        TagEntity nameTag = handler.getChild("NAME_TAG");
+        Deque<TagEntity> tagEntityDeque = new ArrayDeque<>();
 
-        if(healthTag == null && handler.showHealth()){
-            healthTag = spawnHologram(loc, "").get(0);
-            handler.addChild("HEALTH_TAG", healthTag);
+        if(!(handler instanceof HideHealthTag)) {
+            TagEntity healthTag = handler.getChild("HEALTH_TAG");
+
+            if (healthTag == null) {
+                healthTag = spawnHologram(loc, "");
+                handler.addChild("HEALTH_TAG", healthTag);
+            }
+            tagEntityDeque.add(healthTag);
+
+            String text = CharRepo.HEART + Util.formatColour("&f" + (int) health + "/" + (int) maxHealth);
+            ArmorStand armorStand = (ArmorStand) healthTag.asEntity().getBukkitEntity();
+            armorStand.setCustomName(Util.formatColour(text));
         }
-        if(nameTag == null){
-            nameTag = spawnHologram(loc, "").get(0);
-            handler.addChild("NAME_TAG", nameTag);
+        if(!(handler instanceof HideNameTag)){
+            TagEntity nameTag = handler.getChild("NAME_TAG");
+
+            if (nameTag == null) {
+                nameTag = spawnHologram(loc, "");
+                handler.addChild("NAME_TAG", nameTag);
+            }
+            tagEntityDeque.add(nameTag);
+
+            String text = level + " " + name;
+            ArmorStand armorStand = (ArmorStand) nameTag.asEntity().getBukkitEntity();
+            armorStand.setCustomName(Util.formatColour(text));
+        }
+        if(handler instanceof AdditionalTag additionalTag){
+            String overrideTag = additionalTag.overrideTag();
+            int index = 0;
+
+            for(String line : overrideTag.split("[\r\n]+")){
+                line = line.trim();
+                index++;
+                TagEntity nameTag = handler.getChild("ADDITONAL_TAG_" + index);
+
+                if (nameTag == null) {
+                    nameTag = spawnHologram(loc, "");
+                    handler.addChild("ADDITONAL_TAG_" + index, nameTag);
+                }
+                tagEntityDeque.add(nameTag);
+
+                ArmorStand armorStand = (ArmorStand) nameTag.asEntity().getBukkitEntity();
+                armorStand.setCustomName(Util.formatColour(line));
+            }
         }
 
-        String nameText = handler.overrideTag() == null ? level + " " + name : handler.overrideTag();
+        final double startY = 1.8 + offset;
+        final double step = .3;
+        int index = 0;
+        Iterator<TagEntity> iterator = tagEntityDeque.iterator();
 
+        while(iterator.hasNext()){
+            TagEntity tagEntity = iterator.next();
 
-        if(handler.showHealth()){
-            ArmorStand healthAs = (ArmorStand) healthTag.asEntity().getBukkitEntity();
-            healthAs.setCustomName(CharRepo.HEART + Util.formatColour("&f" + (int) health + "/" + (int) maxHealth));
-            healthAs.teleport(loc.clone().add(0, 1.8 + offset, 0));
-
-            ArmorStand nameAs = (ArmorStand) nameTag.asEntity().getBukkitEntity();
-            nameAs.setCustomName(Util.formatColour(nameText));
-            nameAs.teleport(loc.clone().add(0, 2.1 + offset, 0));
-        }else{
-            ArmorStand nameAs = (ArmorStand) nameTag.asEntity().getBukkitEntity();
-            nameAs.setCustomName(Util.formatColour(nameText));
-            nameAs.teleport(loc.clone().add(0, 1.8 + offset, 0));
+            ArmorStand armorStand = (ArmorStand) tagEntity.asEntity().getBukkitEntity();
+            armorStand.teleport(loc.clone().add(0, startY + (index * step), 0));
+            index++;
         }
     }
 
@@ -380,6 +416,10 @@ public class EntityManager implements Listener {
             stands.add(tag);
         }
         return stands;
+    }
+
+    public TagEntity spawnHologram(Location loc, String line){
+        return spawnHologram(loc, new String[]{line}).get(0);
     }
 }
 

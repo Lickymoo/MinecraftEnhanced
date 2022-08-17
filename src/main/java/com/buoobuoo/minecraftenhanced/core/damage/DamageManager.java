@@ -4,6 +4,7 @@ import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
 import com.buoobuoo.minecraftenhanced.core.entity.EntityStatInstance;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.Invulnerable;
 import com.buoobuoo.minecraftenhanced.core.event.CustomEntityKillByPlayerEvent;
 import com.buoobuoo.minecraftenhanced.core.event.abilitycasttype.PlayerCritEvent;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
@@ -79,6 +80,9 @@ public class DamageManager implements Listener {
     }
 
     public void handleDamageP2E(Player damager, CustomEntity damagee, double effectiveness){
+        if(damagee instanceof Invulnerable)
+            return;
+
         ProfileData profileData = plugin.getPlayerManager().getProfile(damager);
         EntityStatInstance statInstance = new EntityStatInstance(plugin, profileData);
 
@@ -213,11 +217,21 @@ public class DamageManager implements Listener {
             Player damagerPlayer = (Player)damager;
             CustomEntity damageeEntity = entityManager.getHandlerByEntity(damagee);
 
+            if(damageeEntity == null) {
+                damagee.remove();
+                return;
+            }
+
             handleDamageP2E(damagerPlayer, damageeEntity, 1);
 
         }else if(damageeIsPlayer){
             CustomEntity damagerEntity = entityManager.getHandlerByEntity(damager);
             Player damageePlayer = (Player)damagee;
+
+            if(damagerEntity == null) {
+                damager.remove();
+                return;
+            }
 
             handleDamageE2P(damagerEntity, damageePlayer);
         }

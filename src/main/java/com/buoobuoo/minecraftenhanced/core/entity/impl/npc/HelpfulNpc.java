@@ -1,15 +1,18 @@
 package com.buoobuoo.minecraftenhanced.core.entity.impl.npc;
 
 import com.buoobuoo.minecraftenhanced.core.entity.AbstractNpc;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.AdditionalTag;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.HideHealthTag;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.HideNameTag;
+import com.buoobuoo.minecraftenhanced.core.entity.interf.tags.Invulnerable;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
 
-public class HelpfulNpc extends AbstractNpc {
+public class HelpfulNpc extends AbstractNpc implements Invulnerable, HideNameTag, HideHealthTag, AdditionalTag {
 
     public HelpfulNpc(Location loc) {
         super(loc);
-        this.setBoundingBox(new AABB(0, 0, 0, 0, 0, 0));
     }
 
     @Override
@@ -23,36 +26,6 @@ public class HelpfulNpc extends AbstractNpc {
     }
 
     @Override
-    public double maxHealth() {
-        return 10;
-    }
-
-    @Override
-    public double damage() {
-        return 0;
-    }
-
-    @Override
-    public double tagOffset() {
-        return 0;
-    }
-
-    @Override
-    public int entityLevel() {
-        return 0;
-    }
-
-    @Override
-    public boolean showHealth() {
-        return false;
-    }
-
-    @Override
-    public String overrideTag() {
-        return CharRepo.SPEECH.getCh();
-    }
-
-    @Override
     public String textureSignature() {
         return "";
     }
@@ -60,5 +33,11 @@ public class HelpfulNpc extends AbstractNpc {
     @Override
     public String textureBase64() {
         return "";
+    }
+
+
+    @Override
+    public String overrideTag() {
+        return CharRepo.SPEECH + "";
     }
 }

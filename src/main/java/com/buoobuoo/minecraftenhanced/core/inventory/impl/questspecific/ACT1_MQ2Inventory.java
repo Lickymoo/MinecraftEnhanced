@@ -42,6 +42,7 @@ public class ACT1_MQ2Inventory extends CustomInventory {
         inv.addItem(customItemManager.getItem(profileData, CustomItems.STARTER_SWORD));
         inv.addItem(customItemManager.getItem(profileData, CustomItems.STARTER_STAFF));
         inv.addItem(customItemManager.getItem(profileData, CustomItems.STARTER_BOW));
+        inv.addItem(customItemManager.getItem(profileData, CustomItems.STARTER_AXE));
         return inv;
     }
 }

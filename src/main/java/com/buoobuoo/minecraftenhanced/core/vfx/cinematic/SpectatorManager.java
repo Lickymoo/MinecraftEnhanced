@@ -1,18 +1,13 @@
 package com.buoobuoo.minecraftenhanced.core.vfx.cinematic;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.entity.impl.util.EmptyEntity;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Pair;
 import com.buoobuoo.minecraftenhanced.core.vfx.cinematic.util.EntityHider;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.AreaEffectCloud;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -26,7 +21,7 @@ import java.util.UUID;
 public class SpectatorManager implements Listener {
     private final MinecraftEnhanced plugin;
 
-    Map<UUID, Entity> entityMap = new HashMap<>();
+    Map<UUID, EmptyEntity> entityMap = new HashMap<>();
     Map<UUID, Pair<Location, ItemStack>> lastLoc = new HashMap<>();
     EntityHider entityHider;
 
@@ -35,49 +30,34 @@ public class SpectatorManager implements Listener {
         entityHider = new EntityHider(plugin, EntityHider.Policy.BLACKLIST);
     }
 
-    public Entity getStandEntity(Location loc) {
-        Entity e = loc.getWorld().spawnEntity(loc, EntityType.AREA_EFFECT_CLOUD);
-        AreaEffectCloud cloud = (AreaEffectCloud)e;
-        cloud.setRadius(0);
-        cloud.setGravity(false);
-        cloud.setCustomNameVisible(false);
-        cloud.setCustomNameVisible(true);
-        cloud.setInvulnerable(true);
-        cloud.setDuration(2147483646/2);
-        cloud.setRadiusPerTick(0);
-        cloud.setParticle(Particle.BLOCK_CRACK, Material.AIR.createBlockData());
-        cloud.setDurationOnUse(0);
-        return e;
+    public EmptyEntity getStandEntity(Location loc) {
+        return (EmptyEntity)plugin.getEntityManager().spawnEntity(EmptyEntity.class, loc);
 
     }
 
-    public Entity getStand(Player player, Location loc) {
-        if(entityMap.containsKey(player.getUniqueId())) {
-            return entityMap.get(player.getUniqueId());
-        }else {
-            Entity entity = getStandEntity(loc);
-            entityMap.put(player.getUniqueId(), entity);
-            return entity;
-        }
+    public EmptyEntity getStand(Player player, Location loc) {
+        entityMap.putIfAbsent(player.getUniqueId(), getStandEntity(loc));
+        return entityMap.get(player.getUniqueId());
     }
 
-    public Entity viewLoc(Player player, Location loc) {
+    public EmptyEntity viewLoc(Player player, Location loc) {
         if(entityMap.containsKey(player.getUniqueId())) return null;
         lastLoc.put(player.getUniqueId(), Pair.of(player.getLocation(),player.getInventory().getHelmet()));
-        Entity stand = getStand(player, loc);
-        player.setGameMode(GameMode.SPECTATOR);
-        player.setSpectatorTarget(stand);
-        player.getInventory().setHelmet(new ItemBuilder(Material.CARVED_PUMPKIN).name("There was no better way lol").create());
-
+        EmptyEntity stand = getStand(player, loc);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            player.setGameMode(GameMode.SPECTATOR);
+            player.setSpectatorTarget(stand.asEntity().getBukkitEntity());
+            player.getInventory().setHelmet(new ItemBuilder(Material.CARVED_PUMPKIN).name("There was no better way lol").create());
+        }, 1);
         return stand;
     }
 
-    public Entity viewLocNoVignette(Player player, Location loc) {
+    public EmptyEntity viewLocNoVignette(Player player, Location loc) {
         if(entityMap.containsKey(player.getUniqueId())) return null;
         lastLoc.put(player.getUniqueId(), Pair.of(player.getLocation(),player.getInventory().getHelmet()));
-        Entity stand = getStand(player, loc);
+        EmptyEntity stand = getStand(player, loc);
         player.setGameMode(GameMode.SPECTATOR);
-        player.setSpectatorTarget(stand);
+        player.setSpectatorTarget(stand.asEntity().getBukkitEntity());
 
         return stand;
     }
@@ -91,7 +71,8 @@ public class SpectatorManager implements Listener {
         player.teleport(lastLoc.get(player.getUniqueId()).getLeft());
         player.getInventory().setHelmet(lastLoc.get(player.getUniqueId()).getRight());
         lastLoc.remove(player.getUniqueId());
-        entityMap.get(player.getUniqueId()).remove();
+        EmptyEntity entity = entityMap.get(player.getUniqueId());
+        plugin.getEntityManager().removeEntity(entity);
         entityMap.remove(player.getUniqueId());
     }
 

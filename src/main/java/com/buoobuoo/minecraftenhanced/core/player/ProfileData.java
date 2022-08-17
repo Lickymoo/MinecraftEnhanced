@@ -17,10 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
@@ -46,7 +43,6 @@ public class ProfileData {
 
     private List<String> completedQuest = new ArrayList<>();
     private List<String> activeQuests = new ArrayList<>();
-
 
     //meta vars
     private ItemStack[] inventoryContents;

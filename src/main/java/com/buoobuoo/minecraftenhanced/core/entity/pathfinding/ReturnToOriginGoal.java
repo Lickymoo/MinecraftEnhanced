@@ -20,6 +20,7 @@ public class ReturnToOriginGoal extends Goal {
     protected final double speed;
     protected final PathNavigation pathNav;
     protected final CustomEntity entity;
+    protected boolean isReturning;
 
     @Nullable
     protected Path path;
@@ -48,14 +49,16 @@ public class ReturnToOriginGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-        return !this.pathNav.isDone();
+        return isReturning;
     }
 
     public void start() {
         this.pathNav.moveTo(this.path, this.speed);
+        this.isReturning = true;
     }
 
     public void stop() {
+        isReturning = false;
     }
 
     public void tick() {

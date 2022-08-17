@@ -19,6 +19,7 @@ public class TagEntity extends ArmorStand implements CustomEntity {
 
         this.setInvulnerable(true);
         this.setSilent(true);
+        this.setMarker(true);
         this.setInvisible(true);
         this.setBoundingBox(new AABB(0, 0, 0, 0, 0, 0));
         this.setCustomName(Component.translatable(text));
@@ -27,41 +28,12 @@ public class TagEntity extends ArmorStand implements CustomEntity {
 
     @Override
     public String entityID() {
-        return "NPC_MIRROR";
+        return "TAG_ENTITY";
     }
 
     @Override
     public String entityName() {
-        return "";
+        return "TAG_ENTITY";
     }
 
-    @Override
-    public String overrideTag() {
-        return "";
-    }
-
-    @Override
-    public double maxHealth() {
-        return 10;
-    }
-
-    @Override
-    public double damage() {
-        return 0;
-    }
-
-    @Override
-    public double tagOffset() {
-        return 0;
-    }
-
-    @Override
-    public int entityLevel() {
-        return 0;
-    }
-
-    @Override
-    public boolean showHealth() {
-        return false;
-    }
 }

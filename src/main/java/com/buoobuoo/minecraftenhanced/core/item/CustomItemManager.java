@@ -11,14 +11,19 @@ import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
 import com.buoobuoo.minecraftenhanced.core.util.ItemBuilder;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
+import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -27,9 +32,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -76,6 +87,7 @@ public class CustomItemManager implements Listener {
         }
 
         ItemStack itemStack = ib.create();
+
         if(profileData != null)
             itemStack = item.update(plugin, profileData, itemStack);
         return itemStack;
@@ -221,6 +233,69 @@ public class CustomItemManager implements Listener {
 
             cooldownList.put(entry.getKey(), ticks);
         }
+    }
+
+    public void updateHeldItem(ItemStack item){
+        if(item == null)
+            return;
+
+        CustomItem handler = registry.getHandler(item);
+        if(!(handler instanceof AlternateHeldItem alternateHeldItem))
+            return;
+
+        MatRepo swapout = alternateHeldItem.swapoutItem();
+
+        ItemMeta meta = item.getItemMeta();;
+        meta.setCustomModelData(swapout.getCustomModelData());
+        item.setType(swapout.getMat());
+        item.setItemMeta(meta);
+    }
+
+    public void revertHeldItem(ItemStack item){
+        if(item == null)
+            return;
+
+        CustomItem handler = registry.getHandler(item);
+        if(!(handler instanceof AlternateHeldItem alternateHeldItem))
+            return;
+
+        ItemMeta meta = item.getItemMeta();;
+        meta.setCustomModelData(handler.getCustomModelData());
+        item.setType(handler.getMaterial());
+        item.setItemMeta(meta);
+    }
+
+    public void updateHeldItems(Player player){
+        for(ItemStack item : player.getInventory()){
+            revertHeldItem(item);
+        }
+        updateHeldItem(player.getInventory().getItemInMainHand());
+    }
+
+    @EventHandler
+    public void changeSlot(PlayerItemHeldEvent event){
+        int slot = event.getNewSlot();
+        ItemStack item = event.getPlayer().getInventory().getItem(slot);
+        updateHeldItem(item);
+        event.getPlayer().getInventory().setItem(slot, item);
+
+        int oldSlot = event.getPreviousSlot();
+        item = event.getPlayer().getInventory().getItem(oldSlot);
+        revertHeldItem(item);
+        event.getPlayer().getInventory().setItem(oldSlot, item);
+    }
+
+    @EventHandler
+    public void cancelSwap(PlayerSwapHandItemsEvent event){
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void moveSwapItem(InventoryClickEvent event){
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Player player = (Player) event.getWhoClicked();
+            updateHeldItems(player);
+        }, 1);
     }
 
     //Handler for placing a custom block (dont ask why its in this manager class lol)

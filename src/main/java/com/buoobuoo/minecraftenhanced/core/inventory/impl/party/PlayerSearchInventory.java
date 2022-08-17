@@ -1,4 +1,4 @@
-package com.buoobuoo.minecraftenhanced.core.inventory.impl;
+package com.buoobuoo.minecraftenhanced.core.inventory.impl.party;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.AnvilRenameEvent;

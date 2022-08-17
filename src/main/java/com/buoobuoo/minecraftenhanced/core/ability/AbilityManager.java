@@ -204,7 +204,9 @@ public class AbilityManager implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent event){
-        Player player = (Player)event.getPlayer();
+        Player player = event.getPlayer();
+        if(!plugin.getPlayerManager().hasActive(player))
+            return;
 
         ProfileData profileData = plugin.getPlayerManager().getProfile(player);
         if(!playerHasCastType(profileData, AbilityCastType.CAST_ON_MOVE))

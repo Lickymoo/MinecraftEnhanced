@@ -43,14 +43,26 @@ public interface ModelEntity extends CustomEntity {
 
     @Override
     default void hideEntity(Player player){
-        if(isSuspended())
-            return;
 
+        CustomEntity.super.hideEntity(player);
         ActiveModel modelEntity = activeModelMap.get(this);
         if(modelEntity == null)
             return;
 
         modelEntity.hideModel(player);
+    }
+
+
+    @Override
+    default void showEntity(Player player){
+        if(!canShow(player))
+            return;
+        CustomEntity.super.showEntity(player);
+        ActiveModel modelEntity = activeModelMap.get(this);
+        if(modelEntity == null)
+            return;
+
+        modelEntity.showModel(player);
     }
 }
 

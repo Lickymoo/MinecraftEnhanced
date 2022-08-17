@@ -6,10 +6,10 @@ import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
-import com.buoobuoo.minecraftenhanced.core.inventory.impl.EmptyPartyInventory;
-import com.buoobuoo.minecraftenhanced.core.inventory.impl.PartyInventory;
-import com.buoobuoo.minecraftenhanced.core.party.Party;
-import com.buoobuoo.minecraftenhanced.core.party.PartyManager;
+import com.buoobuoo.minecraftenhanced.core.inventory.impl.party.EmptyPartyInventory;
+import com.buoobuoo.minecraftenhanced.core.inventory.impl.party.PartyInventory;
+import com.buoobuoo.minecraftenhanced.core.social.party.Party;
+import com.buoobuoo.minecraftenhanced.core.social.party.PartyManager;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 

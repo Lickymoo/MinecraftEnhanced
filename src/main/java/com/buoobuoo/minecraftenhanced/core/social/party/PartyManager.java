@@ -1,4 +1,4 @@
-package com.buoobuoo.minecraftenhanced.core.party;
+package com.buoobuoo.minecraftenhanced.core.social.party;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.event.party.PartyInviteUpdateEvent;

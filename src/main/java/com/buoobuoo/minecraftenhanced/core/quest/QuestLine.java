@@ -1,20 +1,21 @@
 package com.buoobuoo.minecraftenhanced.core.quest;
 
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
+import com.buoobuoo.minecraftenhanced.core.area.Area;
+import com.buoobuoo.minecraftenhanced.core.chat.ChatRestrictionMode;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.NpcEntity;
-import com.buoobuoo.minecraftenhanced.core.event.CustomEntityKillByPlayerEvent;
-import com.buoobuoo.minecraftenhanced.core.event.DialogueNextEvent;
-import com.buoobuoo.minecraftenhanced.core.event.PlayerInteractNpcEvent;
-import com.buoobuoo.minecraftenhanced.core.event.RouteFinishEvent;
+import com.buoobuoo.minecraftenhanced.core.event.*;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
 import com.buoobuoo.minecraftenhanced.core.navigation.RouteSingularPlayer;
 import com.buoobuoo.minecraftenhanced.core.player.ProfileData;
+import com.buoobuoo.minecraftenhanced.core.quest.util.CinematicConsumer;
 import com.buoobuoo.minecraftenhanced.core.util.JSONUtil;
 import com.buoobuoo.minecraftenhanced.core.util.Pair;
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import com.buoobuoo.minecraftenhanced.core.util.unicode.CharRepo;
+import com.buoobuoo.minecraftenhanced.core.vfx.cinematic.CinematicSequence;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -58,8 +59,8 @@ public abstract class QuestLine implements Listener {
     private final Map<Class<? extends NpcEntity>, String> npcInteractMap = new HashMap<>();
     private final Map<Class<? extends CustomEntity>, Map<UUID, String>> customEntityKillMap = new HashMap<>();
     private final Map<Class<? extends CustomItem>, Map<UUID, String>> customItemPickupMap = new HashMap<>();
+    private final Map<Class<? extends Area>, Map<UUID, String>> areaEnterMap = new HashMap<>();
     private final Map<String, Object> objectMap = new HashMap<>();
-    private final Map<UUID, Boolean> delayActive = new HashMap<>();
 
     public QuestLine(MinecraftEnhanced plugin, String questName, String questID, String questBrief){
         this.questName = questName;
@@ -208,14 +209,9 @@ public abstract class QuestLine implements Listener {
 
     public QuestLine delay(int delay){
         return executeOverride(player -> {
-            if(!delayActive.getOrDefault(player.getUniqueId(), false)) {
-                Bukkit.getScheduler().runTaskLater(plugin, pl -> {
-                    next(player);
-                    delayActive.put(player.getUniqueId(), false);
-                }, delay);
-            }
-
-            delayActive.put(player.getUniqueId(), true);
+            Bukkit.getScheduler().runTaskLater(plugin, pl -> {
+                next(player);
+            }, delay);
         });
     }
 
@@ -262,8 +258,27 @@ public abstract class QuestLine implements Listener {
         return this;
     }
 
+    public QuestLine dialogue(CharRepo icon, String text, int delay){
+        String id = UUID.randomUUID().toString();
+        execute(player -> {
+            plugin.getChatManager().setChatMode(player, ChatRestrictionMode.DIALOGUE_RESTRICTION);
+        });
+        Consumer<Player> consumer = player -> {
+            Util.sendDialogueBox(player, icon, text);
+        };
+        execute(consumer);
+        delay(delay);
+        execute(player -> {
+            plugin.getChatManager().setChatMode(player, ChatRestrictionMode.UNRESTRICTED);
+        });
+        return this;
+    }
+
     public QuestLine dialogueNext(CharRepo icon, String text){
         String id = UUID.randomUUID().toString();
+        execute(player -> {
+            plugin.getChatManager().setChatMode(player, ChatRestrictionMode.DIALOGUE_RESTRICTION);
+        });
         Consumer<Player> consumer = player -> {
             TextComponent nextButton = JSONUtil.getJSON(Util.formatColour("             &a&l> Next"), "diagnext " + id, false, "");
             Util.sendDialogueBox(player, icon, text, nextButton);
@@ -271,6 +286,9 @@ public abstract class QuestLine implements Listener {
         };
         addStep(consumer);
         when(id);
+        execute(player -> {
+            plugin.getChatManager().setChatMode(player, ChatRestrictionMode.UNRESTRICTED);
+        });
         return this;
     }
 
@@ -291,6 +309,7 @@ public abstract class QuestLine implements Listener {
         when(id);
         return this;
     }
+
     public QuestLine whenRouteComplete(String routeName){
         String id = UUID.randomUUID().toString();
         Consumer<Player> consumer = player -> {
@@ -326,6 +345,31 @@ public abstract class QuestLine implements Listener {
         execute(consumer);
         when(id);
 
+        return this;
+    }
+
+    public QuestLine whenEnterArea(Class<? extends Area> areaClass){
+        areaEnterMap.putIfAbsent(areaClass, new HashMap<>());
+        String id = UUID.randomUUID().toString();
+
+        Consumer<Player> consumer = player -> {
+            Map<UUID, String> map = areaEnterMap.get(areaClass);
+            map.put(player.getUniqueId(), id);
+        };
+        execute(consumer);
+        when(id);
+        return this;
+    }
+
+    public QuestLine cinematic(CinematicSequence sequence){
+        sequence.onFinish = this::next;
+        Consumer<Player> consumer = sequence::execute;
+        execute(consumer);
+        return this;
+    }
+
+    public QuestLine cinematic(CinematicConsumer cons){
+        execute(player -> cons.accept(player).execute(player));
         return this;
     }
 
@@ -406,6 +450,9 @@ public abstract class QuestLine implements Listener {
     }
 
     public boolean isApplicable(Player player){
+        if(!plugin.getPlayerManager().hasActive(player))
+            return false;
+
         QuestManager questManager = plugin.getQuestManager();
         ProfileData profileData = plugin.getPlayerManager().getProfile(player);
         return questManager.hasActiveQuest(this.getClass(), profileData);
@@ -469,6 +516,17 @@ public abstract class QuestLine implements Listener {
         if(!isApplicable(player))
             return;
 
+        if(map.containsKey(player.getUniqueId()))
+            setDeterminant(player, map.get(player.getUniqueId()), true);
+    }
+
+    @EventHandler
+    public void onEnterArea(AreaEnterEvent event){
+        Player player = event.getPlayer();
+        if(!isApplicable(player))
+            return;
+
+       Map<UUID, String> map = areaEnterMap.getOrDefault(event.getArea().getClass(), new HashMap<>());
         if(map.containsKey(player.getUniqueId()))
             setDeterminant(player, map.get(player.getUniqueId()), true);
     }

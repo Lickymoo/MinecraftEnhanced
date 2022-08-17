@@ -36,10 +36,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 public class PlayerManager implements Listener {
@@ -72,6 +69,9 @@ public class PlayerManager implements Listener {
     }
 
     public ProfileData getProfile(UUID uuid){
+        if(uuid == null)
+            return null;
+
         if(profileDataMap.containsKey(uuid))
             return profileDataMap.get(uuid);
 
@@ -84,6 +84,15 @@ public class PlayerManager implements Listener {
     public boolean hasActive(Player player){
         PlayerData playerData = getPlayer(player);
         return playerData.getActiveProfileID() != null;
+    }
+
+    public List<Player> getActiveProfiles(){
+        List<Player> ret = new ArrayList<>();
+        for(Player player : Bukkit.getOnlinePlayers()){
+            if(hasActive(player))
+                ret.add(player);
+        }
+        return ret;
     }
 
     //Rank tag
@@ -131,6 +140,9 @@ public class PlayerManager implements Listener {
     @EventHandler
     public void onClose(UpdateSecondEvent event){
         for(Player player : Bukkit.getOnlinePlayers()){
+            if(!plugin.getMongoHook().isConnected())
+                return;
+
             PlayerData playerData = plugin.getPlayerManager().getPlayer(player);
             if(playerData.getActiveProfileID() != null)
                 continue;

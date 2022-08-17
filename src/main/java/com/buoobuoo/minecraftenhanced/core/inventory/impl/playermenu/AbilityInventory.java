@@ -69,7 +69,7 @@ public class AbilityInventory extends CustomInventory {
         }, 28, 30, 32, 34);
 
         this.addHandler(event -> {
-            Inventory i = new PlayerMenuMainInventory(plugin, player).getInventory();
+            Inventory i = new PlayerMenuMainInventory(plugin, player, player).getInventory();
             player.openInventory(i);
         }, 0);
     }

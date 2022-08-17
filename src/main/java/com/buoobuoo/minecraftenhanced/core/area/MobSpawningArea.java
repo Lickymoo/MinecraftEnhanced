@@ -3,6 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.area;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.core.entity.EntityManager;
 import com.buoobuoo.minecraftenhanced.core.entity.interf.CustomEntity;
+import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.util.BoundingBox;
@@ -35,11 +36,11 @@ public class MobSpawningArea extends Area{
         EntityManager entityManager = plugin.getEntityManager();
 
         for(Location loc : mobSpawnPoint){
-            if(!loc.getChunk().isLoaded())
+            if(!Util.isChunkLoaded(loc))
                 continue;
 
             CustomEntity entity = attributedEntity.getOrDefault(loc, null);
-            if(entity == null || entity.isDestroyed()){
+            if(entity == null || entity.isDead()){
                 CustomEntity newEntity = entityManager.spawnEntity(entityTypes.get(0), loc);
                 newEntity.setOriginPoint(loc, 12);
                 newEntity.setDestroyOnUnload(true);

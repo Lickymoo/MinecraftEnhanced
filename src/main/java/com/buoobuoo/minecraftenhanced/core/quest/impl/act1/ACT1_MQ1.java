@@ -51,12 +51,11 @@ public class ACT1_MQ1 extends QuestLine {
         dialogueNext(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves \nFood's running low too. Chances are, starvation'll take us before Onryx takes us in.");
         dialogueNext(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves \nEven if they do, refugees like us will only be allowed to live out in the ghettos. Still better than nothing");
         dialogueNext(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves \nWait... you hear that? The bow's starting to rock...");
-        dialogue(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves \nWOAH!?");
+        dialogue(CharRepo.UI_PORTRAIT_CAPTAIN_YVES, "Captain Yves \nWOAH!?", 20);
         execute(player -> {
-            player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
             player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10000, 10000));
             player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 10000, 10000));
-                   });
+        });
         execute(player -> {
             CustomEntity captainYvesNpc = getObject(CustomEntity.class, "CAPTAIN_YVES", player);
             EntityManager entityManager = plugin.getEntityManager();
@@ -66,6 +65,7 @@ public class ACT1_MQ1 extends QuestLine {
         marker("OFF_SHIP");
         execute(player -> {
             player.teleport(new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 195, 51, 282, -180, 0));
+            player.playSound(player, Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
         });
         checkpoint();
         delay(40);
@@ -95,7 +95,7 @@ public class ACT1_MQ1 extends QuestLine {
             putObject("HELPFUL_NPC_ROUTE", route, player);
         });
         whenRouteComplete("HELPFUL_NPC_ROUTE");
-        dialogue(CharRepo.UI_PORTRAIT_JAYCE, "??? \nHey! Wake up. You alright?");
+        dialogue(CharRepo.UI_PORTRAIT_JAYCE, "??? \nHey! Wake up. You alright?", 60);
         whenNpcInteract(HelpfulNpc.class);
         dialogueNext(CharRepo.UI_PORTRAIT_JAYCE, "??? \nMighty storm we had last night, must've tossed you and your barge all around the coast.");
         dialogueNext(CharRepo.UI_PORTRAIT_JAYCE, "??? \nLook at you, all tattered and torn... Follow me. Just a short walk and my settlement will have you rested up and clothed in no time");

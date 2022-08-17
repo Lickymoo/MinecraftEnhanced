@@ -1,4 +1,4 @@
-package com.buoobuoo.minecraftenhanced.core.party;
+package com.buoobuoo.minecraftenhanced.core.social.party;
 
 import com.buoobuoo.minecraftenhanced.core.util.Util;
 import lombok.Getter;

@@ -18,8 +18,8 @@ public class AramoreWolfArea extends MobSpawningArea {
         );
 
         addMobSpawnPoint(new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 140, 67, -65));
-        addMobSpawnPoint(new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 121, 67, -61));
-        addMobSpawnPoint(new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 135, 68, -80));
+        //addMobSpawnPoint(new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 121, 67, -61));
+        //addMobSpawnPoint(new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 135, 68, -80));
 
         addEntityType(ViciousWolfEntity.class);
     }

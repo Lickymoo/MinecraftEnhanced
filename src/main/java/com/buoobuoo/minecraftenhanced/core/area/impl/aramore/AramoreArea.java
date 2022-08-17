@@ -12,7 +12,7 @@ public class AramoreArea extends TownArea {
         super("Aramore",
                 new Location(MinecraftEnhanced.getMainWorld(), 167, 66, 63),
                 BoundingBox.of(
-                        new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 207, 60, 115),
+                        new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 207, 30, 115),
                         new Location(Bukkit.getWorld(MinecraftEnhanced.MAIN_WORLD_NAME), 113, 300, 10)
                         )
         );

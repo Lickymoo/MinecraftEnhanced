@@ -43,16 +43,6 @@ public class RatEntity extends Wolf implements ModelEntity {
     }
 
     @Override
-    public boolean showHealth() {
-        return true;
-    }
-
-    @Override
-    public String overrideTag() {
-        return null;
-    }
-
-    @Override
     public String modelName() {
         return "rat";
     }

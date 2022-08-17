@@ -3,6 +3,7 @@ package com.buoobuoo.minecraftenhanced.core.util;
 import com.buoobuoo.minecraftenhanced.MinecraftEnhanced;
 import com.buoobuoo.minecraftenhanced.ToolType;
 import com.buoobuoo.minecraftenhanced.core.block.CustomBlock;
+import com.buoobuoo.minecraftenhanced.core.chat.ChatManager;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItem;
 import com.buoobuoo.minecraftenhanced.core.item.CustomItemManager;
 import com.buoobuoo.minecraftenhanced.core.item.interfaces.AttributedItem;
@@ -184,7 +185,7 @@ public class Util {
         sendDialogueBox(player, icon, str, null);
     }
 
-    public static void sendDialogueBox(Player player, CharRepo icon, String str, TextComponent nextButton){
+    public static void sendDialogueBox(Player player, CharRepo icon, String str, TextComponent nextButton) {
         int charsPerLine = 54;
 
         String spacing = "            ";
@@ -193,10 +194,10 @@ public class Util {
 
         //ignore spacing on first line
         String line = "";
-        for(String word : words){
-            if((line + " " + word).length() <= charsPerLine && !word.contains("\n")){
+        for (String word : words) {
+            if ((line + " " + word).length() <= charsPerLine && !word.contains("\n")) {
                 line = line + " " + word;
-            }else {
+            } else {
                 lines.add(line.replace("\n", ""));
 
                 line = spacing;
@@ -205,23 +206,26 @@ public class Util {
         }
         lines.add(line.replace("\n", ""));
 
-        for(int i = 0; i < (nextButton == null ? 6 : 5); i++){
-            if(lines.size()-1 < i)
+        for (int i = 0; i < (nextButton == null ? 6 : 5); i++) {
+            if (lines.size() - 1 < i)
                 lines.add(" ");
         }
 
-        for(int i = 0; i < lines.size(); i++) {
+        for (int i = 0; i < lines.size(); i++) {
             String out = lines.get(i);
             if (i == 0) {
                 out = out.trim();
-                player.sendMessage(Util.formatColour(CharRepo.UI_DIALOGUE_BORDER + UnicodeSpaceUtil.getNeg(47) + icon  + UnicodeSpaceUtil.getPos(1) + " " + out));
+                player.sendMessage(ChatManager.OVERRIDE_TAG + Util.formatColour(CharRepo.UI_DIALOGUE_BORDER + UnicodeSpaceUtil.getNeg(47) + icon + UnicodeSpaceUtil.getPos(1) + " " + out));
             } else {
-                player.sendMessage(Util.formatColour(out));
+                player.sendMessage(ChatManager.OVERRIDE_TAG + Util.formatColour(out));
             }
         }
 
-        if(nextButton != null)
+        if (nextButton != null) {
+            nextButton.setText(ChatManager.OVERRIDE_TAG + nextButton.getText());
+
             player.spigot().sendMessage(nextButton);
+        }
     }
 
     public static <T> T[] addToArr(T[] arr, T... str){
@@ -460,6 +464,43 @@ public class Util {
             }
         }
         return null;
+    }
+
+    public static void clearChat(Player player){
+        for(int i = 0; i < 40; i++){
+            player.sendMessage(" ");
+        }
+    }
+
+    public static boolean isChunkLoaded(Location loc){
+        int x = loc.getBlockX() >> 4;
+        int z = loc.getBlockZ() >> 4;
+
+        return loc.getWorld().isChunkLoaded(x, z);
+    }
+
+    public static <T> T[] concatenateArrays(T[] a, T[] b){
+        List<T> list = new ArrayList<>();
+        list.addAll(List.of(a));
+        list.addAll(List.of(b));
+
+        return list.toArray(a);
+    }
+
+    public static String grayScaleString(String input){
+        String section = "\u00a7";
+        String output = input;
+        //dark
+        String[] darkReplace = new String[]{"4", "6", "2", "3", "1", "9", "5", "7", "8", "0"};
+        String[] lightRepalce = new String[]{"c", "e", "a", "b", "d", "f"};
+
+        for(String r : darkReplace){
+            output = output.replace(section + r, section + "8");
+        }
+        for(String r : lightRepalce){
+            output = output.replace(section + r, section + "7");
+        }
+        return output;
     }
 }
 
